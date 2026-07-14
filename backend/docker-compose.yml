@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Postgres Database Service
+  postgresdb:
+    image: postgres:15-alpine
+    container_name: lms_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432" # my machine port:container port
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Node.js Application Service
+  app:
+    build: .
+    container_name: lms_node_app
+    restart: unless-stopped
+    command: sh -c "npx prisma migrate deploy && npm run dev"
+    ports:
+      - "8000:3000" # my machine port:container port
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgresdb:5432/${DB_NAME}
+      - DB_HOST=postgresdb
+      - CHOKIDAR_USEPOLLING=true
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+    depends_on:
+      - postgresdb
+    volumes:
+      - .:/app               # 🔄 Syncs your local files with the container in real-time
+      - /app/node_modules    # 🚫 Protects container node_modules from being deleted by host machine
+
+volumes:
+  pgdata:
