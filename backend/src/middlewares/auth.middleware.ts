@@ -43,6 +43,7 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
       env.ACCESS_TOKEN_SECRET || ""
     ) as AuthenticatedUser;
 
+    // console.log("🔍 DECODED TOKEN PAYLOAD:", decoded); // 👈 Add this line temporary
 
     const userCheck = await userRepository.findByUserId(decoded.sub);
     if (!userCheck) {

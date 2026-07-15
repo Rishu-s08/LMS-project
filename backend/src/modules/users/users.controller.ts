@@ -1,6 +1,8 @@
+import type { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
 import { asyncHandler } from "../../shared/utils/asyncHandler.js";
 import { UserService } from "./users.services.js";
+
 
 
 export class UserController {
@@ -55,6 +57,17 @@ export class UserController {
     })
   })
 
+  updateUserRole = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    const { role } : {role : roles} = req.body;
+    const updatedUser = await this.userService.updateUserRole(userId as string, role);
+
+    res.status(200).json({
+        success : true,
+        message : "User role updated successfully",
+        data : updatedUser
+    })
+  })
 
   changePassword = asyncHandler(async (req, res ) => {
     const userId = req.user?.sub;

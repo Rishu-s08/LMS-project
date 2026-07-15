@@ -1,5 +1,6 @@
 import { prisma } from "../../db/prisma.js";
 import type { Prisma } from "../../generated/prisma/browser.js";
+import type { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
 import { refreshTokenService } from "../authentication/refreshToken/refreshToken.service.js";
 import type { RegisterUserInput } from "./user.validation.js";
@@ -121,5 +122,17 @@ export class UserService {
         await this.userRepository.updatePassword(userId, hashedNewPassword, client);
         await this.refreshTokenService.revokeAllRefreshTokenByUserId(userId, client);
 
+    }
+
+
+    async updateUserRole(userId: string, role: roles){
+        const user = await this.getUserById(userId);
+        if(!user){
+            throw new ApiError(404, "User not found");
+        }
+        const data =  await this.userRepository.updateUserRole(userId, role);
+
+        const { password, ...userWithoutPassword } = data;
+        return userWithoutPassword;
     }
 }

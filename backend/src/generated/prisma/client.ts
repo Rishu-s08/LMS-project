@@ -56,3 +56,18 @@ export type RefreshToken = Prisma.RefreshTokenModel
  * 
  */
 export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model Courses
+ * 
+ */
+export type Courses = Prisma.CoursesModel
+/**
+ * Model Classes
+ * 
+ */
+export type Classes = Prisma.ClassesModel
+/**
+ * Model Enrollment
+ * 
+ */
+export type Enrollment = Prisma.EnrollmentModel

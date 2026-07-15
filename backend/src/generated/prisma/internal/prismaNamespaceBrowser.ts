@@ -53,7 +53,10 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   RefreshToken: 'RefreshToken',
-  PasswordResetToken: 'PasswordResetToken'
+  PasswordResetToken: 'PasswordResetToken',
+  Courses: 'Courses',
+  Classes: 'Classes',
+  Enrollment: 'Enrollment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -110,6 +113,46 @@ export const PasswordResetTokenScalarFieldEnum = {
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const CoursesScalarFieldEnum = {
+  courseId: 'courseId',
+  name: 'name',
+  code: 'code',
+  credits: 'credits',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isArchived: 'isArchived'
+} as const
+
+export type CoursesScalarFieldEnum = (typeof CoursesScalarFieldEnum)[keyof typeof CoursesScalarFieldEnum]
+
+
+export const ClassesScalarFieldEnum = {
+  classId: 'classId',
+  semester: 'semester',
+  year: 'year',
+  branch: 'branch',
+  academicYear: 'academicYear',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isArchived: 'isArchived',
+  courseId: 'courseId',
+  facultyId: 'facultyId'
+} as const
+
+export type ClassesScalarFieldEnum = (typeof ClassesScalarFieldEnum)[keyof typeof ClassesScalarFieldEnum]
+
+
+export const EnrollmentScalarFieldEnum = {
+  enrollmentId: 'enrollmentId',
+  classId: 'classId',
+  studentId: 'studentId',
+  enrolledAt: 'enrolledAt'
+} as const
+
+export type EnrollmentScalarFieldEnum = (typeof EnrollmentScalarFieldEnum)[keyof typeof EnrollmentScalarFieldEnum]
 
 
 export const SortOrder = {

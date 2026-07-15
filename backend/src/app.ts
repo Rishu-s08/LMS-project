@@ -22,6 +22,11 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 
 app.use("/api/v1/auth", authRoutes);
 
+
+// Course Routes
+import courseRoutes from "./modules/courses/courses.routes.js";
+app.use("/api/v1/courses", courseRoutes);
+
 app.use(errorHandler);
 
 export default app;

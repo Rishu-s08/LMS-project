@@ -1,5 +1,6 @@
 import { prisma } from "../../db/prisma.js";
 import type { Prisma } from "../../generated/prisma/browser.js";
+import type { roles } from "../../shared/constants/enums.js";
 import type { RegisterUserInput } from "./user.validation.js";
 
 class UserRepository {
@@ -31,6 +32,17 @@ class UserRepository {
                 userId : userId
             }, data : {
                 password : hashedPassword
+            }
+        })
+    }
+
+    async updateUserRole(userId: string, role: roles, tx? : Prisma.TransactionClient){
+        const client = tx || prisma;
+        return await client.user.update({
+            where : {
+                userId : userId
+            }, data : {
+                role : role
             }
         })
     }

@@ -17,6 +17,16 @@ export const ChangePasswordSchema = z.object({
     newPassword: z.string().min(8, "New password must be at least 8 characters long"),
 })
 
+export const updateRoleSchema = z.object({
+    role : z.enum(RoleEnum.options, "Invalid role. Must be one of ADMIN, STUDENT, or FACULTY")
+})
+
+export const userIdParamSchema = z.object({
+    userId: z.uuid("Invalid user ID format"),
+});
+
 
 export type RegisterUserInput = z.infer<typeof RegisterUserSchema>;
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>; 
+export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;
+export type UserIdParamInput = z.infer<typeof userIdParamSchema>;
