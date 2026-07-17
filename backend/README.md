@@ -75,6 +75,18 @@ Base URL: `/api/v1`
 | GET | `/email/:email` | Yes | FACULTY, ADMIN | Get user by email |
 | POST | `/change-password` | Yes | ALL | Change password (revokes all sessions) |
 
+### Courses (`/api/v1/courses`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/` | Yes | FACULTY, ADMIN | Get all courses |
+| GET | `/:courseId` | Yes | FACULTY, ADMIN | Get course by ID |
+| GET | `/code/:courseCode` | Yes | FACULTY, ADMIN | Get course by code |
+| POST | `/` | Yes | ADMIN | Create a new course |
+| PATCH | `/:courseId` | Yes | ADMIN | Partial update a course |
+| POST | `/:courseId/archive` | Yes | ADMIN | Archive a course |
+| POST | `/:courseId/unarchive` | Yes | ADMIN | Unarchive a course |
+
 ---
 
 ## Project Structure
@@ -102,7 +114,8 @@ backend/
 │       │   ├── auth/             # Login, logout, forgot/reset password
 │       │   ├── refreshToken/     # Token rotation service + repository
 │       │   └── passwordToken/    # Password reset token repository
-│       └── users/                # Registration, profile, password change
+│       ├── users/                # Registration, profile, password change
+│       └── courses/              # Course CRUD, archive/unarchive
 ├── prisma/
 │   └── schema.prisma             # Database schema (User, RefreshToken, PasswordResetToken)
 ├── docker-compose.yml

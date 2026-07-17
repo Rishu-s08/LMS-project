@@ -90,7 +90,9 @@ Every route that accepts a body runs it through `validateRequest(schema)` middle
 - Replaces `req.body` with the parsed/sanitized output (strips extra fields).
 - Returns structured error messages on failure.
 
-**Why:** Controllers and services can trust that `req.body` is already type-safe. No defensive `if (!email)` checks needed deeper in the stack.
+Route parameters (`:courseId`, `:courseCode`) are also validated via `validateParams(schema)` — same pattern applied to `req.params`.
+
+**Why:** Controllers and services can trust that `req.body` and `req.params` are already type-safe. No defensive `if (!email)` checks needed deeper in the stack.
 
 ### 9. Role-Based Access Control (RBAC)
 
@@ -262,38 +264,120 @@ Client                      Server
 
 ---
 
+## Courses Flow
+
+### Create Course (`POST /api/v1/courses`) — ADMIN Only
+
+```
+Client                      Server
+  │                            │
+  │─── { name, code, description?, credits } + Bearer token ──→│
+  │                            ├─ Zod validates body
+  │                            ├─ Auth middleware + ADMIN role check
+  │                            ├─ Create course in DB
+  │                            │
+  │←── 201 + course ──────────────────────────────────────────────│
+```
+
+### Get All Courses (`GET /api/v1/courses`) — FACULTY/ADMIN
+
+Returns all courses (no pagination currently).
+
+### Get Course by ID/Code — FACULTY/ADMIN
+
+- `GET /api/v1/courses/:courseId` — Validates UUID param via `validateParams`.
+- `GET /api/v1/courses/code/:courseCode` — Validates code string param.
+
+### Archive / Unarchive (`POST /api/v1/courses/:courseId/archive|unarchive`) — ADMIN Only
+
+Soft-archive: sets `isArchived` flag to `true`/`false`. Course record is never deleted.
+
+### Update Course (`PATCH /api/v1/courses/:courseId`) — ADMIN Only
+
+Partial update using `createCourseSchema.partial()` with a refinement ensuring at least one field is provided.
+
+### Design Decisions — Courses
+
+| Decision | Reasoning |
+|----------|-----------|
+| Soft-archive instead of delete | Courses have cascading relationships (classes, enrollments). Archiving preserves history while hiding from active views. |
+| `code` field is unique | Course codes (e.g., "CS101") are the natural human-readable identifier. Unique constraint prevents duplicates. |
+| `validateParams` middleware | Route params (`:courseId`, `:courseCode`) are validated with Zod before reaching the controller — same pattern as body validation but for `req.params`. |
+| Partial update with `.partial().refine()` | Allows updating any subset of fields while rejecting empty patch requests at the validation layer. |
+| All routes require authentication | No public course browsing — all access requires at minimum FACULTY role. Only ADMIN can create/modify/archive. |
+
+---
+
 ## Database Schema (ERD)
 
 ```
-┌──────────────────────────┐
-│         User             │
-├──────────────────────────┤
-│ userId (PK, UUID)        │
-│ email (UNIQUE)           │
-│ password                 │
-│ name                     │
-│ branch?                  │
-│ sem? (1-8)               │
-│ avatarUrl?               │
-│ role (STUDENT/FACULTY/   │
-│       ADMIN)             │
-│ isActive                 │
-│ createdAt                │
-│ updatedAt                │
-└──────────┬───────────────┘
-           │ 1:N
-           │
-┌──────────▼───────────────┐     ┌────────────────────────────┐
-│     RefreshToken         │     │   PasswordResetToken       │
-├──────────────────────────┤     ├────────────────────────────┤
-│ tokenId (PK, UUID = jti) │     │ resetTokenId (PK, UUID)    │
-│ userId (FK → User)       │     │ userId (FK → User)         │
-│ expiresAt                │     │ token (UNIQUE, SHA-256 hash)│
-│ revokedAt?               │     │ expiresAt                  │
-│ createdAt                │     │ usedAt?                    │
-└──────────────────────────┘     │ createdAt                  │
-                                 └────────────────────────────┘
-        CASCADE DELETE                   CASCADE DELETE
+┌──────────────────────────────┐
+│            User              │
+├──────────────────────────────┤
+│ userId (PK, UUID)            │
+│ email (UNIQUE)               │
+│ password                     │
+│ name                         │
+│ branch?                      │
+│ sem? (1-8)                   │
+│ avatarUrl?                   │
+│ role (STUDENT/FACULTY/ADMIN) │
+│ isActive                     │
+│ createdAt / updatedAt        │
+└──┬─────────┬─────────┬──────┘
+   │ 1:N     │ 1:N     │ 1:N (as faculty)        1:N (as student)
+   │         │         │                              │
+   ▼         ▼         ▼                              │
+┌────────────────┐ ┌──────────────────┐               │
+│ RefreshToken   │ │ PasswordReset    │               │
+│                │ │ Token            │               │
+├────────────────┤ ├──────────────────┤               │
+│ tokenId (PK,  │ │ resetTokenId(PK) │               │
+│   UUID = jti) │ │ userId (FK)      │               │
+│ userId (FK)   │ │ token (UNIQUE,   │               │
+│ expiresAt     │ │   SHA-256 hash)  │               │
+│ revokedAt?    │ │ expiresAt        │               │
+│ createdAt     │ │ usedAt?          │               │
+└────────────────┘ │ createdAt        │               │
+  CASCADE DELETE    └──────────────────┘               │
+                     CASCADE DELETE                    │
+                                                      │
+┌─────────────────────────┐                           │
+│        Courses          │                           │
+├─────────────────────────┤                           │
+│ courseId (PK, UUID)     │                           │
+│ name                    │                           │
+│ code (UNIQUE)           │                           │
+│ credits?                │                           │
+│ description?            │                           │
+│ isArchived              │                           │
+│ createdAt / updatedAt   │                           │
+└──────────┬──────────────┘                           │
+           │ 1:N                                      │
+           ▼                                          │
+┌──────────────────────────────┐                      │
+│          Classes             │                      │
+├──────────────────────────────┤                      │
+│ classId (PK, UUID)           │                      │
+│ courseId (FK → Courses)      │                      │
+│ facultyId (FK → User)       │                      │
+│ semester, year, branch       │                      │
+│ academicYear                 │                      │
+│ isArchived                   │                      │
+│ createdAt / updatedAt        │                      │
+└──────────┬───────────────────┘                      │
+           │ 1:N                                      │
+           ▼                                          ▼
+┌──────────────────────────────────────────────────────┐
+│              Enrollment                              │
+├──────────────────────────────────────────────────────┤
+│ enrollmentId (PK, UUID)                              │
+│ classId (FK → Classes)                               │
+│ studentId (FK → User)                                │
+│ enrolledAt                                           │
+│ UNIQUE(classId, studentId) — prevents double enroll  │
+└──────────────────────────────────────────────────────┘
+              CASCADE DELETE on both FKs
 ```
 
 ---
