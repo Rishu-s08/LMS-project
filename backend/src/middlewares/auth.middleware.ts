@@ -49,6 +49,9 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
     if (!userCheck) {
       return next(new ApiError(401, "Access denied. User not found."));
     }
+    if(userCheck.isActive === false) {
+      return next(new ApiError(403, "Access denied. User is inactive."));
+    }
 
     // 5. Inject payload into request context so subsequent logic can use it
     req.user = {

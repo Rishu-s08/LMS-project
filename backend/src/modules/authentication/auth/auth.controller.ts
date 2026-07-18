@@ -6,9 +6,9 @@ import { refreshTokenService } from "../refreshToken/refreshToken.service.js";
 
 
 
-export class AuthController{
-    private authService : AuthService;
-    private refreshTokenService : refreshTokenService;
+export class AuthController {
+    private authService: AuthService;
+    private refreshTokenService: refreshTokenService;
     constructor() {
         this.authService = new AuthService();
         this.refreshTokenService = new refreshTokenService();
@@ -20,27 +20,32 @@ export class AuthController{
         res.status(200).json({
             success: true,
             message: "User logged in successfully",
-            accessToken,
-            refreshToken,
-            user: user
+            data: {
+                accessToken,
+                refreshToken,
+                user: user
+            }
         })
     })
 
     refreshToken = asyncHandler(async (req: Request, res: Response) => {
-        const {refreshToken} = req.body;
+        const { refreshToken } = req.body;
 
-        const {accessToken, newRefreshToken} = await this.refreshTokenService.refreshAccessToken(refreshToken);
+        const { accessToken, newRefreshToken } = await this.refreshTokenService.refreshAccessToken(refreshToken);
 
         res.status(200).json({
             success: true,
             message: "Access token refreshed successfully",
-            accessToken,
-            refreshToken: newRefreshToken
+            data: {
+                accessToken,
+                refreshToken: newRefreshToken
+            }
+
         })
     })
 
     logoutUser = asyncHandler(async (req: Request, res: Response) => {
-        const {refreshToken} = req.body;
+        const { refreshToken } = req.body;
         await this.authService.logoutUser(refreshToken);
         res.status(200).json({
             success: true,
@@ -49,19 +54,21 @@ export class AuthController{
     })
 
     forgotPassword = asyncHandler(async (req: Request, res: Response) => {
-        const {email} = req.body;
+        const { email } = req.body;
         // dev purpose, we will return the reset link in the response. In production, we would send this link to the user's email address.
         const result = await this.authService.forgotPassword(email);
         res.status(200).json({
             success: true,
-            resetLink: result.resetLink,
-            token: result.token,
-            message: "Password reset link sent to email"
+            message: "Password reset link sent to email",
+            data: {
+                resetLink: result.resetLink,
+                token: result.token,
+            }
         })
     })
 
     resetPassword = asyncHandler(async (req: Request, res: Response) => {
-        const {token, password} = req.body;
+        const { token, password } = req.body;
         await this.authService.resetPassword(token, password);
         res.status(200).json({
             success: true,
