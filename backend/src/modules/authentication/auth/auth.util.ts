@@ -11,7 +11,8 @@ function generateAccessToken(userId: string, email: string, role: string) : stri
             }, 
             env.ACCESS_TOKEN_SECRET || '',
             {
-                expiresIn: (env.ACCESS_TOKEN_EXPIRY || '15m') as string
+                // TODO: make this configurable from env file
+                expiresIn: (env.ACCESS_TOKEN_EXPIRY || '60m') as string
             } as jwt.SignOptions
         )
             return accessToken;

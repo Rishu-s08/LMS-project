@@ -27,6 +27,11 @@ app.use("/api/v1/auth", authRoutes);
 import courseRoutes from "./modules/courses/courses.routes.js";
 app.use("/api/v1/courses", courseRoutes);
 
+
+// Class Routes
+import classRoutes from "./modules/classes/classes.routes.js";
+app.use("/api/v1/classes", classRoutes);
+
 app.use(errorHandler);
 
 export default app;
