@@ -17,6 +17,8 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | **Authentication** | Login, logout, token refresh (rotation), forgot password, reset password |
 | **Users** | Registration, profile fetch, change password, role-based user lookup |
 | **Courses** | CRUD, archive/unarchive, lookup by ID or code |
+| **Classes** | Ties a course to a faculty for a specific semester/year/branch, archive/unarchive |
+| **Enrollments** | Enroll/unenroll students in classes, bidirectional lookups, unique constraint |
 | **Infrastructure** | Docker + Docker Compose setup, Prisma migrations, centralized error handling |
 | **Middleware** | JWT auth, RBAC (role-based access), Zod body + params validation |
 
@@ -24,8 +26,7 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 
 | Module | Description |
 |--------|-------------|
-| **Classes** | A class ties a course to a faculty member for a specific semester/year/branch |
-| **Enrollments** | Students enroll in classes (unique constraint prevents duplicates) |
+| **Assignments** | Faculty posts assignments with deadlines to their classes |
 
 ### 📋 Planned
 

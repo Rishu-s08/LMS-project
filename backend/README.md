@@ -137,7 +137,9 @@ backend/
 │       │   ├── refreshToken/     # Token rotation service + repository
 │       │   └── passwordToken/    # Password reset token repository
 │       ├── users/                # Registration, profile, password change
-│       └── courses/              # Course CRUD, archive/unarchive
+│       ├── courses/              # Course CRUD, archive/unarchive
+│       ├── classes/              # Class CRUD, archive/unarchive, faculty assignment
+│       └── enrollments/          # Enroll/unenroll students, bidirectional lookups
 ├── prisma/
 │   └── schema.prisma             # Database schema (User, RefreshToken, PasswordResetToken)
 ├── docker-compose.yml
