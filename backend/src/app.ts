@@ -32,6 +32,10 @@ app.use("/api/v1/courses", courseRoutes);
 import classRoutes from "./modules/classes/classes.routes.js";
 app.use("/api/v1/classes", classRoutes);
 
+// Enrollment Routes
+import enrollmentRoutes from "./modules/enrollments/enrollment.route.js";
+app.use("/api/v1/enrollments", enrollmentRoutes);
+
 app.use(errorHandler);
 
 export default app;

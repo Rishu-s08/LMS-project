@@ -18,6 +18,7 @@ model User {
   password String
   name     String 
   branch   String?
+  batch  String? // 2024-2028
   sem  Int?
   avatarUrl   String? @map("avatar_url")
   createdAt DateTime @default(now()) @map("created_at")

@@ -60,7 +60,7 @@ export class ClassesController {
         const { classId } = req.params;
         const classData = await this.classesService.getClassById(classId as string);
         if(!classData) {
-            throw new ApiError(404, `Class with ID ${classId} not found.`);
+            throw new ApiError(404, `Class not found.`);
         }
         const archivedClass = await this.classesService.archiveClass(classId as string);
         res.status(200).json({
@@ -89,7 +89,7 @@ export class ClassesController {
         const classData = await this.classesService.getClassById(classId as string);
 
         if(!classData) {
-            throw new ApiError(404, `Class with ID ${classId} not found.`);
+            throw new ApiError(404, `Class not found.`);
         }
 
         const facultyId = classData?.facultyId;

@@ -87,6 +87,28 @@ Base URL: `/api/v1`
 | POST | `/:courseId/archive` | Yes | ADMIN | Archive a course |
 | POST | `/:courseId/unarchive` | Yes | ADMIN | Unarchive a course |
 
+### Classes (`/api/v1/classes`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/` | Yes | ALL | Get all classes |
+| GET | `/:classId` | Yes | ALL | Get class by ID |
+| GET | `/faculty/:facultyId` | Yes | FACULTY, ADMIN | Get classes by faculty |
+| POST | `/` | Yes | FACULTY, ADMIN | Create a new class |
+| PATCH | `/:classId` | Yes | FACULTY, ADMIN | Partial update a class |
+| POST | `/:classId/archive` | Yes | FACULTY, ADMIN | Archive a class |
+| POST | `/:classId/unarchive` | Yes | FACULTY, ADMIN | Unarchive a class |
+
+### Enrollments (`/api/v1/enrollments`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/:enrollmentId` | Yes | FACULTY, ADMIN | Get enrollment by ID |
+| POST | `/` | Yes | FACULTY, ADMIN | Enroll a student in a class |
+| DELETE | `/:enrollmentId` | Yes | FACULTY, ADMIN | Remove an enrollment |
+| GET | `/students/:studentId/classes` | Yes | ALL | Get all classes for a student |
+| GET | `/classes/:classId/students` | Yes | ALL | Get all students in a class |
+
 ---
 
 ## Project Structure

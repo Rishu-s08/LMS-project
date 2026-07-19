@@ -1,0 +1,61 @@
+import { prisma } from "../../db/prisma.js";
+import type { CreateEnrollmentInput } from "./enrollment.validation.js";
+
+
+
+export class EnrollmentsRepository{
+
+
+    async getEnrollmentById(enrollmentId: string){
+        const enrollment = await prisma.enrollment.findUnique({
+            where:{
+                enrollmentId: enrollmentId
+            },
+            include:{
+                student: true,
+                class: true
+            }
+        });
+        return enrollment;
+    }
+
+    async createEnrollment(data: CreateEnrollmentInput){
+        const newEnrollment = await prisma.enrollment.create({
+            data
+        });
+
+        return newEnrollment;
+    }
+
+    async deleteEnrollment(enrollmentId: string){
+        await prisma.enrollment.delete({
+            where:{
+                enrollmentId: enrollmentId
+            }
+        });
+    }
+
+    async getStudentsByClassId(classId: string){
+        const students = await prisma.enrollment.findMany({
+            where:{
+                classId: classId
+            },
+            include:{
+                student: true
+            }
+        });
+        return students;
+    }
+
+    async getClassesByStudentId(studentId: string){
+        const classes = await prisma.enrollment.findMany({
+            where:{
+                studentId: studentId
+            },
+            include:{
+                class: true
+            }
+        });
+        return classes;
+    }
+}

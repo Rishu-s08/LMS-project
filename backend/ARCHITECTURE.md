@@ -308,6 +308,101 @@ Partial update using `createCourseSchema.partial()` with a refinement ensuring a
 
 ---
 
+## Classes Flow
+
+A **class** ties a course to a specific faculty member for a given semester, year, branch, and academic year. It's the actual "section" students enroll in.
+
+### Create Class (`POST /api/v1/classes`) — FACULTY/ADMIN
+
+```
+Client                      Server
+  │                            │
+  │─── { facultyId, semester, year, branch, academicYear, courseId } ──→│
+  │                            ├─ Zod validates body
+  │                            ├─ Auth + role check (FACULTY/ADMIN)
+  │                            ├─ Verify faculty exists and is not a STUDENT
+  │                            ├─ Verify course exists
+  │                            ├─ Create class in DB
+  │                            │
+  │←── 201 + class ───────────────────────────────────────────────────────│
+```
+
+### Get All Classes (`GET /api/v1/classes`) — ALL Authenticated Roles
+
+Returns all classes (students can browse available classes).
+
+### Get Classes by Faculty (`GET /api/v1/classes/faculty/:facultyId`) — FACULTY/ADMIN
+
+Returns all classes assigned to a specific faculty member. Validates that the user is actually a faculty member.
+
+### Get Class by ID (`GET /api/v1/classes/:classId`) — ALL Authenticated Roles
+
+### Archive / Unarchive (`POST /api/v1/classes/:classId/archive|unarchive`) — FACULTY/ADMIN
+
+Same soft-archive pattern as courses.
+
+### Update Class (`PATCH /api/v1/classes/:classId`) — FACULTY/ADMIN
+
+Partial update. If `facultyId` or `courseId` is being changed, validates the new references exist.
+
+### Design Decisions — Classes
+
+| Decision | Reasoning |
+|----------|-----------|
+| Faculty validated on create/update | Prevents assigning a STUDENT as the instructor. Service checks role before DB write. |
+| Course validated on create/update | Ensures referential integrity at the application level, not just DB constraints — gives clean error messages. |
+| Students can view classes | Students need to browse available classes to enroll. Read access is open to all authenticated roles. |
+| Academic year as regex-validated string | Format `YYYY-YYYY` is enforced at validation layer. Keeps it human-readable without complex date logic. |
+| Soft-archive, not delete | Classes have enrollments. Deleting would cascade-remove student records. Archive hides them instead. |
+
+---
+
+## Enrollments Flow
+
+An **enrollment** maps a student to a class. The `@@unique([classId, studentId])` constraint in Prisma prevents duplicate enrollments at the database level.
+
+### Create Enrollment (`POST /api/v1/enrollments`) — FACULTY/ADMIN
+
+```
+Client                      Server
+  │                            │
+  │─── { studentId, classId } + Bearer token ──→│
+  │                            ├─ Zod validates body
+  │                            ├─ Auth + role check (FACULTY/ADMIN only)
+  │                            ├─ Create enrollment (DB unique constraint prevents duplicates)
+  │                            │
+  │←── 201 + enrollment ───────────────────────────│
+```
+
+### Get Enrollment by ID (`GET /api/v1/enrollments/:enrollmentId`) — FACULTY/ADMIN
+
+Returns the enrollment with included student and class data.
+
+### Delete Enrollment (`DELETE /api/v1/enrollments/:enrollmentId`) — FACULTY/ADMIN
+
+Hard delete — enrollment is a pure mapping record, no history value in keeping it.
+
+### Get All Classes by Student (`GET /api/v1/enrollments/students/:studentId/classes`) — ALL Roles
+
+Validates the user is a STUDENT, then returns all classes they're enrolled in (includes class data).
+
+### Get All Students by Class (`GET /api/v1/enrollments/classes/:classId/students`) — ALL Roles
+
+Validates the class exists, then returns all enrolled students (includes student data).
+
+### Design Decisions — Enrollments
+
+| Decision | Reasoning |
+|----------|-----------|
+| Hard delete instead of soft-delete | Enrollments are pure join records. No audit trail needed — if a student drops, the record is removed. |
+| No update route | An enrollment is just a (student, class) pair. Changing either field = delete + create. No partial update makes sense. |
+| Unique constraint at DB level | `@@unique([classId, studentId])` — the database is the final guard against duplicates, not just application code. |
+| FACULTY/ADMIN can enroll students | Students don't self-enroll (faculty manages class rosters). This matches real university workflows. |
+| Include relations on read | `getEnrollmentById` includes student + class, `getStudentsByClassId` includes student — reduces follow-up queries. |
+| Bidirectional lookup | Both "classes for a student" and "students for a class" are first-class queries. These are the two most common access patterns. |
+
+---
+
 ## Database Schema (ERD)
 
 ```
