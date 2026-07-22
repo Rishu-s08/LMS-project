@@ -22,6 +22,7 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 
 app.use("/api/v1/auth", authRoutes);
 
+app.use("/api/v1/uploads", express.static("uploads"));
 
 // Course Routes
 import courseRoutes from "./modules/courses/courses.routes.js";
@@ -35,6 +36,12 @@ app.use("/api/v1/classes", classRoutes);
 // Enrollment Routes
 import enrollmentRoutes from "./modules/enrollments/enrollment.route.js";
 app.use("/api/v1/enrollments", enrollmentRoutes);
+
+
+// Assignment Routes
+import assignmentRoutes from "./modules/assignments/assignments.route.js";
+app.use("/api/v1/assignments", assignmentRoutes);
+
 
 app.use(errorHandler);
 

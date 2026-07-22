@@ -1,7 +1,7 @@
 // src/middlewares/errorHandler.ts
 import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../shared/errors/api_error.js";
-import * as jwt from "jsonwebtoken";
+import multer from "multer";
 
 export const errorHandler = (
   err: Error,
@@ -22,7 +22,16 @@ export const errorHandler = (
     return res.status(401).json({
       status: "fail",
       message: "Invalid or expired token. Please log in again."
+   });
+  }
+
+  if (err instanceof multer.MulterError) {
+    res.status(400).json({
+      success: false,
+      code: err.code,
+      message: err.message === 'File too large' ? 'File size exceeds the 10MB limit' : err.message
     });
+    return;
   }
 
   // Fallback for unexpected system errors

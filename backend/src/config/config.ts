@@ -6,4 +6,7 @@ export const env = {
     ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY || '15m',
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "default_refresh_secret",
     REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY || '7d',
+    SUPABASE_URL : process.env.SUPABASE_URL || 'https://supabase.co',
+    SUPABASE_PUBLISHABLE_KEY : process.env.SUPABASE_PUBLISHABLE_KEY || 'your-key',
+    SUPABASE_SECRET_KEY : process.env.SUPABASE_SECRET_KEY || 'your-secret-key',
 }

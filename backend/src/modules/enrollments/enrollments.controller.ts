@@ -23,9 +23,6 @@ export class EnrollmentsController {
     getEnrollmentById = asyncHandler(async (req, res) => {
         const { enrollmentId } = req.params;
         const enrollment = await this.enrollmentsService.getEnrollmentById(enrollmentId as string);
-        if(!enrollment) {
-            throw new ApiError(404, `Enrollment not found.`);
-        }
         res.status(200).json({
             success: true,
             message : "Enrollment fetched successfully",

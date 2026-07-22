@@ -56,7 +56,10 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   Courses: 'Courses',
   Classes: 'Classes',
-  Enrollment: 'Enrollment'
+  Enrollment: 'Enrollment',
+  Assignment: 'Assignment',
+  Resource: 'Resource',
+  Submission: 'Submission'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -81,6 +84,7 @@ export const UserScalarFieldEnum = {
   password: 'password',
   name: 'name',
   branch: 'branch',
+  batch: 'batch',
   sem: 'sem',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
@@ -153,6 +157,45 @@ export const EnrollmentScalarFieldEnum = {
 } as const
 
 export type EnrollmentScalarFieldEnum = (typeof EnrollmentScalarFieldEnum)[keyof typeof EnrollmentScalarFieldEnum]
+
+
+export const AssignmentScalarFieldEnum = {
+  assignmentId: 'assignmentId',
+  title: 'title',
+  description: 'description',
+  dueDate: 'dueDate',
+  createdAt: 'createdAt',
+  classId: 'classId',
+  attachmentUrl: 'attachmentUrl',
+  isPublished: 'isPublished'
+} as const
+
+export type AssignmentScalarFieldEnum = (typeof AssignmentScalarFieldEnum)[keyof typeof AssignmentScalarFieldEnum]
+
+
+export const ResourceScalarFieldEnum = {
+  resourceId: 'resourceId',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  attachmentUrl: 'attachmentUrl',
+  classId: 'classId'
+} as const
+
+export type ResourceScalarFieldEnum = (typeof ResourceScalarFieldEnum)[keyof typeof ResourceScalarFieldEnum]
+
+
+export const SubmissionScalarFieldEnum = {
+  submissionId: 'submissionId',
+  assignmentId: 'assignmentId',
+  studentId: 'studentId',
+  submittedAt: 'submittedAt',
+  attachmentUrl: 'attachmentUrl',
+  note: 'note'
+} as const
+
+export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
 
 
 export const SortOrder = {

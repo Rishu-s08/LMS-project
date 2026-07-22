@@ -7,6 +7,7 @@ export const RegisterUserSchema = z.object({
     password: z.string().min(8, "Password must be at least 8 characters long"),
     role: RoleEnum.default(RoleEnum.enum.STUDENT),
     branch: z.string().nullable().default(null),
+    batch: z.string().nullable().default(null), // 2024
     sem: z.number().int().min(1).max(8).nullable().default(null),
     name: z.string().min(3, "Name must be at least 3 characters long"),
     avatarUrl : z.url("Invalid URL").nullable().default(null),

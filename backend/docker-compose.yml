@@ -30,13 +30,16 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}
       - DB_NAME=${DB_NAME}
       - DB_PORT=5432
     depends_on:
       - postgresdb
     volumes:
-      - .:/app               # 🔄 Syncs your local files with the container in real-time
-      - /app/node_modules    # 🚫 Protects container node_modules from being deleted by host machine
+      - .:/app               
+      - /app/node_modules
+      - ./uploads:/app/dist/uploads
 
 volumes:
   pgdata:

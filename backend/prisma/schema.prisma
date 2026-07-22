@@ -18,7 +18,7 @@ model User {
   password String
   name     String 
   branch   String?
-  batch  String? // 2024-2028
+  batch  String? // 2024
   sem  Int?
   avatarUrl   String? @map("avatar_url")
   createdAt DateTime @default(now()) @map("created_at")
@@ -31,6 +31,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   classes Classes[]
   enrollments Enrollment[]
+  submissions Submission[]
 }
 
 enum Role {
@@ -100,6 +101,8 @@ model Classes {
 
   @@map("classes")
   enrollments Enrollment[]
+  assignments Assignment[]
+  resources Resource[]
 }
 
 
@@ -115,3 +118,55 @@ model Enrollment {
   @@unique([classId, studentId])
   @@map("enrollments")
 }
+
+
+
+model Assignment {
+  assignmentId String @id @default(uuid()) @map("assignment_id")
+  title String
+  description String?
+  dueDate DateTime @map("due_date")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  classId String @map("class_id")
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+
+  attachmentUrl String? @map("attachment_url")
+
+  isPublished Boolean @default(true) @map("is_published")
+
+  @@map("assignments")
+  submissions Submission[]
+}
+
+
+
+model Resource {
+  resourceId String @id @default(uuid()) @map("resource_id")
+  title String
+  description String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  attachmentUrl String? @map("attachment_url")
+
+  classId String @map("class_id")
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+}
+
+
+
+model Submission {
+  submissionId String @id @default(uuid()) @map("submission_id")
+  assignmentId String @map("assignment_id")
+  studentId String @map("student_id")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+  attachmentUrl String? @map("attachment_url")
+  note String? @map("note")
+
+  assignment Assignment @relation(fields: [assignmentId], references: [assignmentId], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("submissions")
+} 

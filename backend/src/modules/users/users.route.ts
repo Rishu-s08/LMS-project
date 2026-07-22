@@ -16,6 +16,6 @@ router.get("/me",authMiddleware, authorizeRoles(roles.STUDENT, roles.FACULTY, ro
 router.get("/id/:userId", authMiddleware, authorizeRoles(roles.FACULTY, roles.ADMIN), userController.getUserById);
 router.get("/email/:email", authMiddleware, authorizeRoles(roles.FACULTY, roles.ADMIN), userController.getUserByEmail);
 router.post("/change-password", authMiddleware, authorizeRoles(roles.STUDENT, roles.FACULTY, roles.ADMIN),validateRequest(ChangePasswordSchema), userController.changePassword);
-router.patch("/update-role/:userId", authMiddleware, authorizeRoles(roles.ADMIN), validateRequest(updateRoleSchema), userController.updateUserRole);
-
+router.patch("/update-role/:userId", authMiddleware, authorizeRoles(roles.ADMIN, roles.STUDENT), validateRequest(updateRoleSchema), userController.updateUserRole);
+//TODO remove the student role from the above route, only admin should be able to update roles of other users
 export default router;

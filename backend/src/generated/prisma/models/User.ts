@@ -40,6 +40,7 @@ export type UserMinAggregateOutputType = {
   password: string | null
   name: string | null
   branch: string | null
+  batch: string | null
   sem: number | null
   avatarUrl: string | null
   createdAt: Date | null
@@ -54,6 +55,7 @@ export type UserMaxAggregateOutputType = {
   password: string | null
   name: string | null
   branch: string | null
+  batch: string | null
   sem: number | null
   avatarUrl: string | null
   createdAt: Date | null
@@ -68,6 +70,7 @@ export type UserCountAggregateOutputType = {
   password: number
   name: number
   branch: number
+  batch: number
   sem: number
   avatarUrl: number
   createdAt: number
@@ -92,6 +95,7 @@ export type UserMinAggregateInputType = {
   password?: true
   name?: true
   branch?: true
+  batch?: true
   sem?: true
   avatarUrl?: true
   createdAt?: true
@@ -106,6 +110,7 @@ export type UserMaxAggregateInputType = {
   password?: true
   name?: true
   branch?: true
+  batch?: true
   sem?: true
   avatarUrl?: true
   createdAt?: true
@@ -120,6 +125,7 @@ export type UserCountAggregateInputType = {
   password?: true
   name?: true
   branch?: true
+  batch?: true
   sem?: true
   avatarUrl?: true
   createdAt?: true
@@ -221,6 +227,7 @@ export type UserGroupByOutputType = {
   password: string
   name: string
   branch: string | null
+  batch: string | null
   sem: number | null
   avatarUrl: string | null
   createdAt: Date
@@ -258,6 +265,7 @@ export type UserWhereInput = {
   password?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   branch?: Prisma.StringNullableFilter<"User"> | string | null
+  batch?: Prisma.StringNullableFilter<"User"> | string | null
   sem?: Prisma.IntNullableFilter<"User"> | number | null
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -268,6 +276,7 @@ export type UserWhereInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   classes?: Prisma.ClassesListRelationFilter
   enrollments?: Prisma.EnrollmentListRelationFilter
+  submissions?: Prisma.SubmissionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -276,6 +285,7 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
   branch?: Prisma.SortOrderInput | Prisma.SortOrder
+  batch?: Prisma.SortOrderInput | Prisma.SortOrder
   sem?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -286,6 +296,7 @@ export type UserOrderByWithRelationInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   classes?: Prisma.ClassesOrderByRelationAggregateInput
   enrollments?: Prisma.EnrollmentOrderByRelationAggregateInput
+  submissions?: Prisma.SubmissionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -297,6 +308,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   branch?: Prisma.StringNullableFilter<"User"> | string | null
+  batch?: Prisma.StringNullableFilter<"User"> | string | null
   sem?: Prisma.IntNullableFilter<"User"> | number | null
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -307,6 +319,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   classes?: Prisma.ClassesListRelationFilter
   enrollments?: Prisma.EnrollmentListRelationFilter
+  submissions?: Prisma.SubmissionListRelationFilter
 }, "userId" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -315,6 +328,7 @@ export type UserOrderByWithAggregationInput = {
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
   branch?: Prisma.SortOrderInput | Prisma.SortOrder
+  batch?: Prisma.SortOrderInput | Prisma.SortOrder
   sem?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -337,6 +351,7 @@ export type UserScalarWhereWithAggregatesInput = {
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   branch?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  batch?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   sem?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -351,6 +366,7 @@ export type UserCreateInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -361,6 +377,7 @@ export type UserCreateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesCreateNestedManyWithoutFacultyInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -369,6 +386,7 @@ export type UserUncheckedCreateInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -379,6 +397,7 @@ export type UserUncheckedCreateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesUncheckedCreateNestedManyWithoutFacultyInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserUpdateInput = {
@@ -387,6 +406,7 @@ export type UserUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -397,6 +417,7 @@ export type UserUpdateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUpdateManyWithoutFacultyNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -405,6 +426,7 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +437,7 @@ export type UserUncheckedUpdateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUncheckedUpdateManyWithoutFacultyNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -423,6 +446,7 @@ export type UserCreateManyInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -437,6 +461,7 @@ export type UserUpdateManyMutationInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -451,6 +476,7 @@ export type UserUncheckedUpdateManyInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -465,6 +491,7 @@ export type UserCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
   branch?: Prisma.SortOrder
+  batch?: Prisma.SortOrder
   sem?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -483,6 +510,7 @@ export type UserMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
   branch?: Prisma.SortOrder
+  batch?: Prisma.SortOrder
   sem?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -497,6 +525,7 @@ export type UserMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
   branch?: Prisma.SortOrder
+  batch?: Prisma.SortOrder
   sem?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -598,12 +627,27 @@ export type UserUpdateOneRequiredWithoutEnrollmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.UserUpdateWithoutEnrollmentsInput>, Prisma.UserUncheckedUpdateWithoutEnrollmentsInput>
 }
 
+export type UserCreateNestedOneWithoutSubmissionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubmissionsInput, Prisma.UserUncheckedCreateWithoutSubmissionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubmissionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSubmissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubmissionsInput, Prisma.UserUncheckedCreateWithoutSubmissionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubmissionsInput
+  upsert?: Prisma.UserUpsertWithoutSubmissionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.UserUpdateWithoutSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutSubmissionsInput>
+}
+
 export type UserCreateWithoutRefreshTokensInput = {
   userId?: string
   email: string
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -613,6 +657,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesCreateNestedManyWithoutFacultyInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -621,6 +666,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -630,6 +676,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesUncheckedCreateNestedManyWithoutFacultyInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -654,6 +701,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -663,6 +711,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUpdateManyWithoutFacultyNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -671,6 +720,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -680,6 +730,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUncheckedUpdateManyWithoutFacultyNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -688,6 +739,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -697,6 +749,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesCreateNestedManyWithoutFacultyInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -705,6 +758,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -714,6 +768,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesUncheckedCreateNestedManyWithoutFacultyInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -738,6 +793,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -747,6 +803,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUpdateManyWithoutFacultyNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -755,6 +812,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -764,6 +822,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUncheckedUpdateManyWithoutFacultyNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutClassesInput = {
@@ -772,6 +831,7 @@ export type UserCreateWithoutClassesInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -781,6 +841,7 @@ export type UserCreateWithoutClassesInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutClassesInput = {
@@ -789,6 +850,7 @@ export type UserUncheckedCreateWithoutClassesInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -798,6 +860,7 @@ export type UserUncheckedCreateWithoutClassesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutClassesInput = {
@@ -822,6 +885,7 @@ export type UserUpdateWithoutClassesInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -831,6 +895,7 @@ export type UserUpdateWithoutClassesInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutClassesInput = {
@@ -839,6 +904,7 @@ export type UserUncheckedUpdateWithoutClassesInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -848,6 +914,7 @@ export type UserUncheckedUpdateWithoutClassesInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutEnrollmentsInput = {
@@ -856,6 +923,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -865,6 +933,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesCreateNestedManyWithoutFacultyInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutEnrollmentsInput = {
@@ -873,6 +942,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   password: string
   name: string
   branch?: string | null
+  batch?: string | null
   sem?: number | null
   avatarUrl?: string | null
   createdAt?: Date | string
@@ -882,6 +952,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   classes?: Prisma.ClassesUncheckedCreateNestedManyWithoutFacultyInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutEnrollmentsInput = {
@@ -906,6 +977,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -915,6 +987,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUpdateManyWithoutFacultyNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEnrollmentsInput = {
@@ -923,6 +996,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -932,6 +1006,99 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   classes?: Prisma.ClassesUncheckedUpdateManyWithoutFacultyNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutSubmissionsInput = {
+  userId?: string
+  email: string
+  password: string
+  name: string
+  branch?: string | null
+  batch?: string | null
+  sem?: number | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: $Enums.Role
+  isActive?: boolean
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  classes?: Prisma.ClassesCreateNestedManyWithoutFacultyInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutSubmissionsInput = {
+  userId?: string
+  email: string
+  password: string
+  name: string
+  branch?: string | null
+  batch?: string | null
+  sem?: number | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: $Enums.Role
+  isActive?: boolean
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  classes?: Prisma.ClassesUncheckedCreateNestedManyWithoutFacultyInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutSubmissionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubmissionsInput, Prisma.UserUncheckedCreateWithoutSubmissionsInput>
+}
+
+export type UserUpsertWithoutSubmissionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSubmissionsInput, Prisma.UserUncheckedUpdateWithoutSubmissionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubmissionsInput, Prisma.UserUncheckedCreateWithoutSubmissionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSubmissionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSubmissionsInput, Prisma.UserUncheckedUpdateWithoutSubmissionsInput>
+}
+
+export type UserUpdateWithoutSubmissionsInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  classes?: Prisma.ClassesUpdateManyWithoutFacultyNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSubmissionsInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  branch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sem?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  classes?: Prisma.ClassesUncheckedUpdateManyWithoutFacultyNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 
@@ -944,6 +1111,7 @@ export type UserCountOutputType = {
   passwordResetTokens: number
   classes: number
   enrollments: number
+  submissions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -951,6 +1119,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   classes?: boolean | UserCountOutputTypeCountClassesArgs
   enrollments?: boolean | UserCountOutputTypeCountEnrollmentsArgs
+  submissions?: boolean | UserCountOutputTypeCountSubmissionsArgs
 }
 
 /**
@@ -991,6 +1160,13 @@ export type UserCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.Type
   where?: Prisma.EnrollmentWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SubmissionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
@@ -998,6 +1174,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   name?: boolean
   branch?: boolean
+  batch?: boolean
   sem?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -1008,6 +1185,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   classes?: boolean | Prisma.User$classesArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
+  submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1017,6 +1195,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   name?: boolean
   branch?: boolean
+  batch?: boolean
   sem?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -1031,6 +1210,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   name?: boolean
   branch?: boolean
+  batch?: boolean
   sem?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -1045,6 +1225,7 @@ export type UserSelectScalar = {
   password?: boolean
   name?: boolean
   branch?: boolean
+  batch?: boolean
   sem?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
@@ -1053,12 +1234,13 @@ export type UserSelectScalar = {
   isActive?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "email" | "password" | "name" | "branch" | "sem" | "avatarUrl" | "createdAt" | "updatedAt" | "role" | "isActive", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "email" | "password" | "name" | "branch" | "batch" | "sem" | "avatarUrl" | "createdAt" | "updatedAt" | "role" | "isActive", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   classes?: boolean | Prisma.User$classesArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
+  submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1071,6 +1253,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     classes: Prisma.$ClassesPayload<ExtArgs>[]
     enrollments: Prisma.$EnrollmentPayload<ExtArgs>[]
+    submissions: Prisma.$SubmissionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     userId: string
@@ -1078,6 +1261,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     password: string
     name: string
     branch: string | null
+    batch: string | null
     sem: number | null
     avatarUrl: string | null
     createdAt: Date
@@ -1482,6 +1666,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classes<T extends Prisma.User$classesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$classesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   enrollments<T extends Prisma.User$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  submissions<T extends Prisma.User$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1516,6 +1701,7 @@ export interface UserFieldRefs {
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly branch: Prisma.FieldRef<"User", 'String'>
+  readonly batch: Prisma.FieldRef<"User", 'String'>
   readonly sem: Prisma.FieldRef<"User", 'Int'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -2008,6 +2194,30 @@ export type User$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.EnrollmentScalarFieldEnum | Prisma.EnrollmentScalarFieldEnum[]
+}
+
+/**
+ * User.submissions
+ */
+export type User$submissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Submission
+   */
+  select?: Prisma.SubmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Submission
+   */
+  omit?: Prisma.SubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubmissionInclude<ExtArgs> | null
+  where?: Prisma.SubmissionWhereInput
+  orderBy?: Prisma.SubmissionOrderByWithRelationInput | Prisma.SubmissionOrderByWithRelationInput[]
+  cursor?: Prisma.SubmissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
 }
 
 /**

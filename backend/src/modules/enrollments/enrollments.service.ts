@@ -20,10 +20,26 @@ export class EnrollmentsService {
 
     async getEnrollmentById(enrollmentId: string) {
         const enrollment = await this.enrollmentsRepository.getEnrollmentById(enrollmentId);
+        if(!enrollment) {
+            throw new ApiError(404, `Enrollment not found.`);
+        }
         return enrollment;
     }
 
     async createEnrollment(data : CreateEnrollmentInput){
+        const user = await this.userService.getUserById(data.studentId);
+        if(!user || user.role !== roles.STUDENT){
+            throw new ApiError(404, `User not found.`);
+        }
+        const classData = await this.classesService.getClassById(data.classId);
+        if(!classData){
+            throw new ApiError(404, "Class not found");
+        }
+        const existingEnrollment = await this.enrollmentsRepository.getStudentsByClassId(data.classId);
+        const isAlreadyEnrolled = existingEnrollment.some(enrollment => enrollment.studentId === data.studentId);
+        if(isAlreadyEnrolled){
+            throw new ApiError(400, `Student is already enrolled in this class.`);
+        }
         const newEnrollment = await this.enrollmentsRepository.createEnrollment(data);
         return newEnrollment;
     }

@@ -47,3 +47,18 @@ export type Classes = Prisma.ClassesModel
  * 
  */
 export type Enrollment = Prisma.EnrollmentModel
+/**
+ * Model Assignment
+ * 
+ */
+export type Assignment = Prisma.AssignmentModel
+/**
+ * Model Resource
+ * 
+ */
+export type Resource = Prisma.ResourceModel
+/**
+ * Model Submission
+ * 
+ */
+export type Submission = Prisma.SubmissionModel
