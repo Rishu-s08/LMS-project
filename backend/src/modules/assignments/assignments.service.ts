@@ -2,7 +2,8 @@ import { ApiError } from "../../shared/errors/api_error.js";
 import { ClassesService } from "../classes/classes.service.js";
 import { assignmentRepository } from "./assignments.repository.js";
 import type { CreateAssignmentInput } from "./assignments.validation.js";
-import { deleteFromCloud, uploadToCloud } from "./supabase.util.js";
+import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
+import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 
 export class AssignmentsService{
     private readonly assignmentsRepository: assignmentRepository;
@@ -48,7 +49,7 @@ export class AssignmentsService{
 
         let attachmentUrl: string | null = null;
         if (file) {
-            attachmentUrl = await uploadToCloud(file);
+            attachmentUrl = await uploadToCloud(file, SupabaseConstants.assignmentsBucket);
         }
 
         const assignment = await this.assignmentsRepository.createAssignment(data, attachmentUrl);
@@ -79,10 +80,10 @@ export class AssignmentsService{
         let newAttachmentUrl: string | null = assignment.attachmentUrl;
 
         if (file) {
-            newAttachmentUrl = await uploadToCloud(file);
+            newAttachmentUrl = await uploadToCloud(file, SupabaseConstants.assignmentsBucket);
             
             if(attachmentUrl){
-                await deleteFromCloud(attachmentUrl);
+                await deleteFromCloud(attachmentUrl, SupabaseConstants.assignmentsBucket);
             }
 
             // Optional optimization tip: You could call supabase.storage.from().remove() here 
@@ -100,7 +101,7 @@ export class AssignmentsService{
         }
         const deletedAssignment = await this.assignmentsRepository.deleteAssignment(assignmentId);
         if(assignment.attachmentUrl){
-            await deleteFromCloud(assignment.attachmentUrl);
+            await deleteFromCloud(assignment.attachmentUrl, SupabaseConstants.assignmentsBucket);
         }
         return deletedAssignment;
     }

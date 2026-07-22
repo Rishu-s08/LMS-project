@@ -43,6 +43,10 @@ import assignmentRoutes from "./modules/assignments/assignments.route.js";
 app.use("/api/v1/assignments", assignmentRoutes);
 
 
+// resources Route
+import resourceRoutes from "./modules/resources/resouces.routes.js";
+app.use("/api/v1/resources", resourceRoutes);
+
 app.use(errorHandler);
 
 export default app;
