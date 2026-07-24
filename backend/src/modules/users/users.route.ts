@@ -17,6 +17,8 @@ const userController = new UserController();
  *   post:
  *     tags: [Users]
  *     summary: Register a new user
+ *     security:
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -69,8 +71,10 @@ const userController = new UserController();
  *                   $ref: '#/components/schemas/User'
  *       409:
  *         description: User with this email already exists
+ *       401:
+ *         description: Unauthorized
  */
-router.post("/create", validateRequest(RegisterUserSchema) ,userController.registerUser);
+router.post("/create", authMiddleware, validateRequest(RegisterUserSchema) ,userController.registerUser);
 
 /**
  * @openapi
