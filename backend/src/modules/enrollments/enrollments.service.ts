@@ -71,4 +71,9 @@ export class EnrollmentsService {
         return classes;
     }
 
+    async isStudentEnrolledInClass(studentId: string, classId: string) {
+        const enrollment = await this.enrollmentsRepository.getEnrollmentByStudentAndClass(studentId, classId);
+        return !!enrollment;
+    }
+
 }

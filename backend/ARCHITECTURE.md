@@ -127,6 +127,20 @@ Using `@prisma/adapter-pg` instead of Prisma's built-in connection handling.
 
 **Why:** One `docker-compose up` gives a fully working environment. No local Postgres install needed. Volume mount for node_modules prevents OS-specific binary conflicts.
 
+### 13. File Uploads — Multer + Supabase Storage
+
+File handling follows a consistent pattern across assignments, resources, and submissions:
+
+1. **Multer (memoryStorage)** parses the multipart request → file lives in `file.buffer`.
+2. **Supabase Storage** receives the buffer with a unique filename and returns a public URL.
+3. The public URL is stored in the DB record (`attachmentUrl` column).
+4. On update with new file: upload new → delete old from cloud.
+5. On delete: remove cloud file if exists.
+
+Each domain uses its own Supabase bucket (`assignments`, `resources`, `submissions`) via `SupabaseConstants`.
+
+**Why:** Decouples file storage from the app server. Files are served directly from Supabase CDN. No Express static file serving, no disk management. The shared `uploadToCloud`/`deleteFromCloud` utilities prevent code duplication across modules.
+
 ---
 
 ## Authentication Flow
@@ -403,6 +417,151 @@ Validates the class exists, then returns all enrolled students (includes student
 
 ---
 
+## Assignments Flow
+
+An **assignment** is posted by faculty to a class with a title, optional description, due date, and optional file attachment (uploaded to Supabase Storage).
+
+### Create Assignment (`POST /api/v1/assignments`) — FACULTY/ADMIN
+
+```
+Client                      Server
+  │                            │
+  │─── multipart/form-data: { title, description?, dueDate, classId, │
+  │     isPublished?, attachment? } + Bearer token ──────────────────→│
+  │                            ├─ Auth + role check (FACULTY/ADMIN)
+  │                            ├─ Multer parses file (memoryStorage → buffer)
+  │                            ├─ Zod validates body
+  │                            ├─ Verify class exists
+  │                            ├─ Validate dueDate is in the future
+  │                            ├─ If file: upload to Supabase → get public URL
+  │                            ├─ Create assignment in DB (with attachmentUrl)
+  │                            │
+  │←── 201 + assignment ───────────────────────────────────────────────│
+```
+
+### Get Assignments by Class (`GET /api/v1/assignments/classes/:classId`) — ALL Roles
+
+### Update Assignment (`PATCH /api/v1/assignments/:assignmentId`) — FACULTY/ADMIN
+
+- Cannot update if due date has passed.
+- If a new file is uploaded: upload new → delete old from cloud.
+- Partial update (same `.partial().refine()` pattern).
+
+### Delete Assignment (`DELETE /api/v1/assignments/:assignmentId`) — FACULTY/ADMIN
+
+Deletes assignment record and removes attachment from Supabase if one exists.
+
+### Design Decisions — Assignments
+
+| Decision | Reasoning |
+|----------|-----------|
+| File upload via Supabase Storage | Decouples file storage from the app server. Supabase provides public URLs — no need to serve files through Express. |
+| Multer memoryStorage | Files stay in RAM as buffers for direct upload to Supabase. No temp disk writes. Works for ≤10MB limit. |
+| Due date validation | Prevents creating assignments with past deadlines. Also blocks edits after deadline passes. |
+| `isPublished` flag | Faculty can create draft assignments (unpublished) before making them visible to students. |
+| Old file cleanup on update | When a new attachment replaces the old one, the old file is deleted from cloud to avoid orphaned storage. |
+
+---
+
+## Resources Flow
+
+A **resource** is course material (PDF, image) attached to a class. Similar to assignments but without due dates or submissions.
+
+### Create Resource (`POST /api/v1/resources`) — FACULTY/ADMIN
+
+```
+Client                      Server
+  │                            │
+  │─── multipart/form-data: { title, description?, classId, │
+  │     attachment? } + Bearer token ───────────────────────→│
+  │                            ├─ Auth + role check (FACULTY/ADMIN)
+  │                            ├─ Multer parses file
+  │                            ├─ Zod validates body
+  │                            ├─ Verify class exists
+  │                            ├─ If file: upload to Supabase → get public URL
+  │                            ├─ Create resource in DB
+  │                            │
+  │←── 201 + resource ─────────────────────────────────────────│
+```
+
+### Get Resources by Class (`GET /api/v1/resources/classes/:classId`) — ALL Roles
+
+### Update Resource (`PATCH /api/v1/resources/:resourceId`) — FACULTY/ADMIN
+
+If new file uploaded: upload new → delete old from cloud.
+
+### Delete Resource (`DELETE /api/v1/resources/:resourceId`) — FACULTY/ADMIN
+
+Deletes record and removes attachment from Supabase.
+
+### Design Decisions — Resources
+
+| Decision | Reasoning |
+|----------|-----------|
+| Same upload pattern as assignments | Consistent file handling (Multer → Supabase) across all modules. One shared `uploadToCloud` utility. |
+| No due date or submissions | Resources are static materials — no student interaction beyond viewing/downloading. |
+| Attachment is optional | A resource can be a text-only announcement-style post (title + description) without a file. |
+
+---
+
+## Submissions Flow
+
+A **submission** is a student's work uploaded against an assignment. Enforces one submission per student per assignment via a unique constraint.
+
+### Create Submission (`POST /api/v1/submissions`) — STUDENT Only
+
+```
+Client                      Server
+  │                            │
+  │─── multipart/form-data: { assignmentId, studentId, note?, │
+  │     attachment? } + Bearer token ─────────────────────────→│
+  │                            ├─ Auth + role check (STUDENT only)
+  │                            ├─ Multer parses file
+  │                            ├─ Zod validates body
+  │                            ├─ Verify assignment exists
+  │                            ├─ Verify studentId matches logged-in user (prevents spoofing)
+  │                            ├─ Check due date hasn't passed
+  │                            ├─ Verify student is enrolled in the assignment's class
+  │                            ├─ If file: upload to Supabase → get public URL
+  │                            ├─ Create submission in DB
+  │                            │
+  │←── 201 + submission ───────────────────────────────────────────│
+```
+
+### Get My Submission (`GET /api/v1/submissions/assignments/:assignmentId/my-submissions`) — STUDENT
+
+Uses the composite unique key `(assignmentId, studentId)` for lookup.
+
+### Get All Submissions for Assignment (`GET /api/v1/submissions/assignments/:assignmentId`) — FACULTY/ADMIN
+
+Faculty views all student submissions for grading.
+
+### Update Submission (`PATCH /api/v1/submissions/:submissionId`) — STUDENT Only
+
+- Only the owning student can update.
+- Cannot update after due date.
+- Cannot change the assignment reference.
+- File replacement follows same upload-new → delete-old pattern.
+
+### Delete Submission (`DELETE /api/v1/submissions/:submissionId`) — STUDENT Only
+
+- Only the owning student can delete.
+- Cannot delete after due date.
+- Removes file from Supabase if present.
+
+### Design Decisions — Submissions
+
+| Decision | Reasoning |
+|----------|-----------|
+| `@@unique([assignmentId, studentId])` | One submission per student per assignment. Enforced at DB level — prevents race conditions. |
+| Ownership check (`userId !== data.studentId`) | Students can only submit for themselves. Prevents one student submitting on behalf of another. |
+| Enrollment verification | Student must be enrolled in the class the assignment belongs to. Prevents submissions to random assignments. |
+| Due date enforcement on create/update/delete | After deadline: no new submissions, no edits, no deletions. Preserves academic integrity. |
+| Only STUDENT role can submit | Faculty/admin cannot submit on behalf of students. Clean separation of roles. |
+| File upload to separate bucket | Submissions go to `submissions` bucket. Keeps cloud storage organized per domain. |
+
+---
+
 ## Database Schema (ERD)
 
 ```
@@ -414,6 +573,7 @@ Validates the class exists, then returns all enrolled students (includes student
 │ password                     │
 │ name                         │
 │ branch?                      │
+│ batch?                       │
 │ sem? (1-8)                   │
 │ avatarUrl?                   │
 │ role (STUDENT/FACULTY/ADMIN) │
@@ -460,19 +620,35 @@ Validates the class exists, then returns all enrolled students (includes student
 │ academicYear                 │                      │
 │ isArchived                   │                      │
 │ createdAt / updatedAt        │                      │
-└──────────┬───────────────────┘                      │
-           │ 1:N                                      │
-           ▼                                          ▼
-┌──────────────────────────────────────────────────────┐
-│              Enrollment                              │
-├──────────────────────────────────────────────────────┤
-│ enrollmentId (PK, UUID)                              │
-│ classId (FK → Classes)                               │
-│ studentId (FK → User)                                │
-│ enrolledAt                                           │
-│ UNIQUE(classId, studentId) — prevents double enroll  │
-└──────────────────────────────────────────────────────┘
-              CASCADE DELETE on both FKs
+└──┬───────────┬───────────┬───┘                      │
+   │ 1:N       │ 1:N       │ 1:N                     │
+   ▼           ▼           ▼                          ▼
+┌────────────┐ ┌──────────┐ ┌──────────────────────────┐
+│ Assignment │ │ Resource │ │      Enrollment          │
+├────────────┤ ├──────────┤ ├──────────────────────────┤
+│assignmentId│ │resourceId│ │ enrollmentId (PK)        │
+│ title      │ │ title    │ │ classId (FK → Classes)   │
+│description?│ │descript? │ │ studentId (FK → User)    │
+│ dueDate    │ │attachUrl?│ │ enrolledAt               │
+│ attachUrl? │ │ classId  │ │ UNIQUE(classId,studentId)│
+│ isPublished│ │created/  │ └──────────────────────────┘
+│ classId(FK)│ │ updated  │       CASCADE DELETE
+│ createdAt  │ └──────────┘
+└─────┬──────┘
+      │ 1:N
+      ▼
+┌──────────────────────────────────────┐
+│           Submission                 │
+├──────────────────────────────────────┤
+│ submissionId (PK, UUID)              │
+│ assignmentId (FK → Assignment)       │
+│ studentId (FK → User)                │
+│ submittedAt                          │
+│ attachmentUrl?                       │
+│ note?                                │
+│ UNIQUE(assignmentId, studentId)      │
+└──────────────────────────────────────┘
+         CASCADE DELETE on both FKs
 ```
 
 ---
@@ -501,5 +677,7 @@ Response ←────────────────────── e
 | Database    | PostgreSQL 15           |
 | Validation  | Zod 4                  |
 | Auth        | jsonwebtoken + bcrypt   |
+| File Storage| Supabase Storage        |
+| File Upload | Multer (memoryStorage)  |
 | Dev Server  | tsx watch (hot reload)  |
 | Container   | Docker + Docker Compose |

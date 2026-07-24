@@ -109,6 +109,39 @@ Base URL: `/api/v1`
 | GET | `/students/:studentId/classes` | Yes | ALL | Get all classes for a student |
 | GET | `/classes/:classId/students` | Yes | ALL | Get all students in a class |
 
+### Assignments (`/api/v1/assignments`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/` | Yes | ADMIN | Get all assignments |
+| GET | `/:assignmentId` | Yes | FACULTY, ADMIN | Get assignment by ID |
+| GET | `/classes/:classId` | Yes | ALL | Get assignments by class |
+| POST | `/` | Yes | FACULTY, ADMIN | Create assignment (multipart) |
+| PATCH | `/:assignmentId` | Yes | FACULTY, ADMIN | Update assignment (multipart) |
+| DELETE | `/:assignmentId` | Yes | FACULTY, ADMIN | Delete assignment + cloud file |
+
+### Resources (`/api/v1/resources`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/` | Yes | ADMIN | Get all resources |
+| GET | `/:resourceId` | Yes | FACULTY, ADMIN | Get resource by ID |
+| GET | `/classes/:classId` | Yes | ALL | Get resources by class |
+| POST | `/` | Yes | FACULTY, ADMIN | Create resource (multipart) |
+| PATCH | `/:resourceId` | Yes | FACULTY, ADMIN | Update resource (multipart) |
+| DELETE | `/:resourceId` | Yes | FACULTY, ADMIN | Delete resource + cloud file |
+
+### Submissions (`/api/v1/submissions`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/assignments/:assignmentId` | Yes | FACULTY, ADMIN | All submissions for an assignment |
+| GET | `/:submissionId` | Yes | FACULTY, ADMIN | Get submission by ID |
+| GET | `/assignments/:assignmentId/my-submissions` | Yes | STUDENT | Get own submission for assignment |
+| POST | `/` | Yes | STUDENT | Submit work (multipart) |
+| PATCH | `/:submissionId` | Yes | STUDENT | Update submission (multipart) |
+| DELETE | `/:submissionId` | Yes | STUDENT | Delete submission |
+
 ---
 
 ## Project Structure
@@ -139,7 +172,10 @@ backend/
 │       ├── users/                # Registration, profile, password change
 │       ├── courses/              # Course CRUD, archive/unarchive
 │       ├── classes/              # Class CRUD, archive/unarchive, faculty assignment
-│       └── enrollments/          # Enroll/unenroll students, bidirectional lookups
+│       ├── enrollments/          # Enroll/unenroll students, bidirectional lookups
+│       ├── assignments/          # Assignment CRUD with file upload (Supabase)
+│       ├── resources/            # Class resources/materials with file upload
+│       └── submissions/          # Student submissions with ownership + deadline enforcement
 ├── prisma/
 │   └── schema.prisma             # Database schema (User, RefreshToken, PasswordResetToken)
 ├── docker-compose.yml

@@ -19,23 +19,22 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | **Courses** | CRUD, archive/unarchive, lookup by ID or code |
 | **Classes** | Ties a course to a faculty for a specific semester/year/branch, archive/unarchive |
 | **Enrollments** | Enroll/unenroll students in classes, bidirectional lookups, unique constraint |
+| **Assignments** | Faculty posts assignments with deadlines, file attachments (Supabase Storage) |
+| **Resources** | Course materials (PDFs, images) shared per class with cloud storage |
+| **Submissions** | Students submit work against assignments, ownership + deadline enforcement |
 | **Infrastructure** | Docker + Docker Compose setup, Prisma migrations, centralized error handling |
-| **Middleware** | JWT auth, RBAC (role-based access), Zod body + params validation |
+| **Middleware** | JWT auth, RBAC (role-based access), Zod body + params validation, Multer file upload |
 
 ### 🔨 In Progress
 
 | Module | Description |
 |--------|-------------|
-| **Assignments** | Faculty posts assignments with deadlines to their classes |
+| **Announcements** | Faculty/admin announcements to classes or globally |
 
 ### 📋 Planned
 
 | Module | Description |
 |--------|-------------|
-| **Assignments** | Faculty posts assignments with deadlines to their classes |
-| **Submissions** | Students submit work against assignments |
-| **Resources** | Course materials (PDFs, links, etc.) shared per class |
-| **Announcements** | Faculty/admin announcements to classes or globally |
 | **Notifications** | In-app notifications for students on new assignments, grades, etc. |
 | **Frontend** | React/Next.js frontend (not yet started) |
 
@@ -48,6 +47,7 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | Backend | Express 5 · TypeScript 6 · Node.js 20 |
 | Database | PostgreSQL 15 · Prisma 7.8 (PrismaPg adapter) |
 | Auth | JWT (access + refresh tokens) · bcrypt · crypto |
+| File Storage | Supabase Storage · Multer |
 | Validation | Zod 4 |
 | DevOps | Docker · Docker Compose |
 | Frontend | TBD |

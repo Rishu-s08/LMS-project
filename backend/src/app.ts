@@ -47,6 +47,12 @@ app.use("/api/v1/assignments", assignmentRoutes);
 import resourceRoutes from "./modules/resources/resouces.routes.js";
 app.use("/api/v1/resources", resourceRoutes);
 
+
+// submissions Route
+import submissionRoutes from "./modules/submissions/submissions.routes.js";
+app.use("/api/v1/submissions", submissionRoutes);
+
+
 app.use(errorHandler);
 
 export default app;

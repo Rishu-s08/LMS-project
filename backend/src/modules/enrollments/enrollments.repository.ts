@@ -58,4 +58,14 @@ export class EnrollmentsRepository{
         });
         return classes;
     }
+
+    async getEnrollmentByStudentAndClass(studentId: string, classId: string) {
+        const enrollment = await prisma.enrollment.findFirst({
+            where: {
+                studentId: studentId,
+                classId: classId
+            }
+        });
+        return enrollment;
+    }
 }
