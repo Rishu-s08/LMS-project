@@ -1,9 +1,14 @@
 
 import express from "express";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.config.js";
 
 const app = express();
 
 app.use(express.json());
+
+// Swagger API Docs
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/api/v1", (req, res) => {
   res.send("Welcome to the LMS backend!");

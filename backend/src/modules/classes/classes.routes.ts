@@ -4,7 +4,6 @@ import { authorizeRoles } from "../../middlewares/role.middleware.js";
 import { Role } from "../../generated/prisma/enums.js";
 import { validateParams, validateRequest } from "../../middlewares/validation.middleware.js";
 import { classIdParamSchema, CreateClassSchema, UpdateClassSchema, userIdParamSchema } from "./classes.validation.js";
-import { de } from "zod/locales";
 import { ClassesController } from "./classes.controller.js";
 
 
@@ -12,32 +11,252 @@ import { ClassesController } from "./classes.controller.js";
 const router = Router();
 const classesController = new ClassesController();
 
-// get all classes 
+/**
+ * @openapi
+ * /classes:
+ *   get:
+ *     tags: [Classes]
+ *     summary: Get all classes
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all classes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Class'
+ */
 router.get("/", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY, Role.STUDENT), classesController.getAllClasses)
 
-// get classes by facultyId
+/**
+ * @openapi
+ * /classes/faculty/{facultyId}:
+ *   get:
+ *     tags: [Classes]
+ *     summary: Get all classes for a specific faculty member
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: facultyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: List of classes assigned to this faculty
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Class'
+ *       400:
+ *         description: User is not a faculty member
+ *       404:
+ *         description: Faculty not found
+ */
 router.get("/faculty/:facultyId", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY), validateParams(userIdParamSchema), classesController.getClassesByFacultyId)
 
-// get class by classId
+/**
+ * @openapi
+ * /classes/{classId}:
+ *   get:
+ *     tags: [Classes]
+ *     summary: Get class by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Class found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Class'
+ *       404:
+ *         description: Class not found
+ */
 router.get("/:classId", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY, Role.STUDENT), validateParams(classIdParamSchema), classesController.getClassById)
 
-// create a new class
+/**
+ * @openapi
+ * /classes:
+ *   post:
+ *     tags: [Classes]
+ *     summary: Create a new class
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [facultyId, semester, year, branch, academicYear, courseId]
+ *             properties:
+ *               facultyId:
+ *                 type: string
+ *                 format: uuid
+ *               semester:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 8
+ *               year:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 4
+ *               branch:
+ *                 type: string
+ *               academicYear:
+ *                 type: string
+ *                 pattern: '^\d{4}-\d{4}$'
+ *                 example: "2025-2026"
+ *               courseId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       201:
+ *         description: Class created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Class'
+ *       400:
+ *         description: Faculty user is a STUDENT (invalid)
+ *       404:
+ *         description: Faculty or course not found
+ */
 router.post("/", authMiddleware, validateRequest(CreateClassSchema), authorizeRoles(Role.ADMIN, Role.FACULTY), classesController.createClass)
 
-// update a class
+/**
+ * @openapi
+ * /classes/{classId}:
+ *   patch:
+ *     tags: [Classes]
+ *     summary: Update a class (partial)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               facultyId:
+ *                 type: string
+ *                 format: uuid
+ *               semester:
+ *                 type: integer
+ *               year:
+ *                 type: integer
+ *               branch:
+ *                 type: string
+ *               academicYear:
+ *                 type: string
+ *               courseId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       200:
+ *         description: Class updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Class'
+ *       404:
+ *         description: Class not found
+ */
 router.patch("/:classId", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY), validateParams(classIdParamSchema), validateRequest(UpdateClassSchema), classesController.updateClass)
 
-// archive a class
+/**
+ * @openapi
+ * /classes/{classId}/archive:
+ *   post:
+ *     tags: [Classes]
+ *     summary: Archive a class (soft-delete)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Class archived
+ *       404:
+ *         description: Class not found
+ */
 router.post("/:classId/archive", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY), validateParams(classIdParamSchema), classesController.archiveClass)
 
-// unarchive a class
+/**
+ * @openapi
+ * /classes/{classId}/unarchive:
+ *   post:
+ *     tags: [Classes]
+ *     summary: Unarchive a class
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Class unarchived
+ *       404:
+ *         description: Class not found
+ */
 router.post("/:classId/unarchive", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY), validateParams(classIdParamSchema), classesController.unarchiveClass)
-
-// get faculty of a class // i think do we need this route? we can get the facultyId from the class object itself
-// router.get("/:classId/faculty", authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY, Role.STUDENT), classesController.getFacultyOfClass)
-
-// get course of a class // i think do we need this route? we can get the courseId from the class object itself
-// router.get("/:classId/course" , authMiddleware, authorizeRoles(Role.ADMIN, Role.FACULTY, Role.STUDENT), classesController.getCourseOfClass)
 
 
 export default router;
