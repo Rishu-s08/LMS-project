@@ -1,6 +1,6 @@
 # Learning Management System (LMS)
 
-> 🚧 **Actively under development** — This project is being built from scratch as a full-stack Learning Management System.
+> ✅ **Backend v1 complete** — All core modules are built and functional. Frontend development is next.
 
 ## What is this?
 
@@ -22,14 +22,9 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | **Assignments** | Faculty posts assignments with deadlines, file attachments (Supabase Storage) |
 | **Resources** | Course materials (PDFs, images) shared per class with cloud storage |
 | **Submissions** | Students submit work against assignments, ownership + deadline enforcement |
+| **Announcements** | Faculty/admin announcements to classes, enrollment-gated for students |
 | **Infrastructure** | Docker + Docker Compose setup, Prisma migrations, centralized error handling |
 | **Middleware** | JWT auth, RBAC (role-based access), Zod body + params validation, Multer file upload |
-
-### 🔨 In Progress
-
-| Module | Description |
-|--------|-------------|
-| **Announcements** | Faculty/admin announcements to classes or globally |
 
 ### 📋 Planned
 

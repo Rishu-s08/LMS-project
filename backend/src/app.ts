@@ -53,6 +53,10 @@ import submissionRoutes from "./modules/submissions/submissions.routes.js";
 app.use("/api/v1/submissions", submissionRoutes);
 
 
+// announcements Route
+import announcementRoutes from "./modules/announcements/annoucements.routes.js";
+app.use("/api/v1/announcements", announcementRoutes);
+
 app.use(errorHandler);
 
 export default app;

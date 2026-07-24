@@ -562,6 +562,51 @@ Faculty views all student submissions for grading.
 
 ---
 
+## Announcements Flow
+
+An **announcement** is a message posted by faculty/admin to a class. Students can only view announcements for classes they're enrolled in.
+
+### Create Announcement (`POST /api/v1/announcements`) — FACULTY/ADMIN
+
+```
+Client                      Server
+  │                            │
+  │─── { title, content, classId } + Bearer token ──→│
+  │                            ├─ Auth + role check (FACULTY/ADMIN)
+  │                            ├─ Zod validates body
+  │                            ├─ Verify class exists
+  │                            ├─ Create announcement in DB
+  │                            │
+  │←── 201 + announcement ─────────────────────────────│
+```
+
+### Get Announcements for Class (`GET /api/v1/announcements/class/:classId`) — ALL Roles
+
+- FACULTY/ADMIN: direct access.
+- STUDENT: enrollment is verified before returning data.
+
+Results are ordered by `createdAt` descending (newest first).
+
+### Update Announcement (`PATCH /api/v1/announcements/:announcementId`) — FACULTY/ADMIN
+
+Partial update. Cannot change the class an announcement belongs to.
+
+### Delete Announcement (`DELETE /api/v1/announcements/:announcementId`) — FACULTY/ADMIN
+
+Hard delete — announcements are ephemeral by nature.
+
+### Design Decisions — Announcements
+
+| Decision | Reasoning |
+|----------|-----------|
+| Enrollment check for students | Students should only see announcements for their own classes. Prevents information leakage across classes. |
+| Cannot change classId on update | An announcement belongs to a specific class context. Moving it would confuse students who already saw it. |
+| Ordered by newest first | Announcements are time-sensitive. Most recent should appear at the top. |
+| Hard delete | No archival value — once deleted, it's gone. Unlike courses/classes, announcements don't have cascading dependencies. |
+| No file attachment (yet) | Validation schema has the `file` field defined as optional/future. Currently text-only. |
+
+---
+
 ## Database Schema (ERD)
 
 ```
@@ -623,16 +668,16 @@ Faculty views all student submissions for grading.
 └──┬───────────┬───────────┬───┘                      │
    │ 1:N       │ 1:N       │ 1:N                     │
    ▼           ▼           ▼                          ▼
-┌────────────┐ ┌──────────┐ ┌──────────────────────────┐
-│ Assignment │ │ Resource │ │      Enrollment          │
-├────────────┤ ├──────────┤ ├──────────────────────────┤
-│assignmentId│ │resourceId│ │ enrollmentId (PK)        │
-│ title      │ │ title    │ │ classId (FK → Classes)   │
-│description?│ │descript? │ │ studentId (FK → User)    │
-│ dueDate    │ │attachUrl?│ │ enrolledAt               │
-│ attachUrl? │ │ classId  │ │ UNIQUE(classId,studentId)│
-│ isPublished│ │created/  │ └──────────────────────────┘
-│ classId(FK)│ │ updated  │       CASCADE DELETE
+┌────────────┐ ┌──────────┐ ┌──────────────┐ ┌──────────────────────────┐
+│ Assignment │ │ Resource │ │ Announcement │ │      Enrollment          │
+├────────────┤ ├──────────┤ ├──────────────┤ ├──────────────────────────┤
+│assignmentId│ │resourceId│ │announcementId│ │ enrollmentId (PK)        │
+│ title      │ │ title    │ │ title        │ │ classId (FK → Classes)   │
+│description?│ │descript? │ │ content      │ │ studentId (FK → User)    │
+│ dueDate    │ │attachUrl?│ │ classId (FK) │ │ enrolledAt               │
+│ attachUrl? │ │ classId  │ │ created/     │ │ UNIQUE(classId,studentId)│
+│ isPublished│ │created/  │ │  updated     │ └──────────────────────────┘
+│ classId(FK)│ │ updated  │ └──────────────┘       CASCADE DELETE
 │ createdAt  │ └──────────┘
 └─────┬──────┘
       │ 1:N

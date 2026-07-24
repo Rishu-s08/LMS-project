@@ -142,6 +142,16 @@ Base URL: `/api/v1`
 | PATCH | `/:submissionId` | Yes | STUDENT | Update submission (multipart) |
 | DELETE | `/:submissionId` | Yes | STUDENT | Delete submission |
 
+### Announcements (`/api/v1/announcements`)
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| GET | `/class/:classId` | Yes | ALL | Get announcements for a class |
+| GET | `/:announcementId` | Yes | ALL | Get announcement by ID |
+| POST | `/` | Yes | FACULTY, ADMIN | Create announcement |
+| PATCH | `/:announcementId` | Yes | FACULTY, ADMIN | Update announcement |
+| DELETE | `/:announcementId` | Yes | FACULTY, ADMIN | Delete announcement |
+
 ---
 
 ## Project Structure
@@ -175,7 +185,8 @@ backend/
 │       ├── enrollments/          # Enroll/unenroll students, bidirectional lookups
 │       ├── assignments/          # Assignment CRUD with file upload (Supabase)
 │       ├── resources/            # Class resources/materials with file upload
-│       └── submissions/          # Student submissions with ownership + deadline enforcement
+│       ├── submissions/          # Student submissions with ownership + deadline enforcement
+│       └── announcements/        # Faculty/admin announcements per class
 ├── prisma/
 │   └── schema.prisma             # Database schema (User, RefreshToken, PasswordResetToken)
 ├── docker-compose.yml

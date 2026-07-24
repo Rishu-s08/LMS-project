@@ -103,6 +103,7 @@ model Classes {
   enrollments Enrollment[]
   assignments Assignment[]
   resources Resource[]
+  announcements Announcement[]
 }
 
 
@@ -152,6 +153,8 @@ model Resource {
 
   classId String @map("class_id")
   class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+
+  @@map("resources")
 }
 
 
@@ -170,3 +173,17 @@ model Submission {
   @@unique([assignmentId, studentId])
   @@map("submissions")
 } 
+
+
+model Announcement {
+  announcementId String @id @default(uuid()) @map("announcement_id")
+  title String
+  content String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  classId String @map("class_id")
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+
+  @@map("announcements")
+}

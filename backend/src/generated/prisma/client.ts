@@ -86,3 +86,8 @@ export type Resource = Prisma.ResourceModel
  * 
  */
 export type Submission = Prisma.SubmissionModel
+/**
+ * Model Announcement
+ * 
+ */
+export type Announcement = Prisma.AnnouncementModel
