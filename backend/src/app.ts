@@ -1,11 +1,31 @@
-
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.config.js";
+import { RedisStore } from "rate-limit-redis";
+import rateLimit from "express-rate-limit";
+import { redisClient } from "./config/redis.config.js";
 
 const app = express();
 
 app.use(express.json());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests, please try again later."
+    });
+  },
+  store: new RedisStore({
+      sendCommand: async (command: string, ...args: string[]): Promise<any> => {
+      return redisClient.call(command, ...args);
+      },
+    })
+  })
+)
 
 // Swagger API Docs
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
