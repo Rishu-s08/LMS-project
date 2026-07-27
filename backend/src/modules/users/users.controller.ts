@@ -84,4 +84,63 @@ export class UserController {
         message : "Password changed successfully",
     })
   })
+
+  getAllUsers = asyncHandler(async (req, res) => {
+    const users = await this.userService.getAllUsers();
+
+    res.status(200).json({
+        success : true,
+        message : "Users fetched successfully",
+        data : users
+    })
+  })
+
+  updateAvatar = asyncHandler(async (req, res) => {
+    const userId = req.user?.sub;
+
+    if(!userId){
+        throw new ApiError(401, "Unauthorized. User not found in request context.");
+    }
+
+    const file = req.file || null;
+    const updatedUser = await this.userService.updateAvatar(userId, file);
+
+    res.status(200).json({
+        success : true,
+        message : "Avatar updated successfully",
+        data : updatedUser
+    })
+  })
+
+  deactivateUser = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    const user = await this.userService.deactivateUser(userId as string);
+
+    res.status(200).json({
+        success : true,
+        message : "User deactivated successfully",
+        data : user
+    })
+  })
+
+  activateUser = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    const user = await this.userService.activateUser(userId as string);
+
+    res.status(200).json({
+        success : true,
+        message : "User activated successfully",
+        data : user
+    })
+  })
+
+  deleteUser = asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+    await this.userService.deleteUser(userId as string);
+
+    res.status(200).json({
+        success : true,
+        message : "User deleted successfully",
+    })
+  })
 }

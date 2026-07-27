@@ -9,4 +9,5 @@ export const env = {
     SUPABASE_URL : process.env.SUPABASE_URL || 'https://supabase.co',
     SUPABASE_PUBLISHABLE_KEY : process.env.SUPABASE_PUBLISHABLE_KEY || 'your-key',
     SUPABASE_SECRET_KEY : process.env.SUPABASE_SECRET_KEY || 'your-secret-key',
+    REDIS_URL : process.env.REDIS_URL || 'redis://localhost:6379'
 }

@@ -22,6 +22,17 @@ export const updateRoleSchema = z.object({
     role : z.enum(RoleEnum.options, "Invalid role. Must be one of ADMIN, STUDENT, or FACULTY")
 })
 
+export const updateAvatarSchema = z.object({
+    file: z.object({
+        fieldname: z.literal('avatar'),
+        size: z.number().max(5 * 1024 * 1024, "Avatar cannot exceed 5MB"),
+        mimetype: z.string().refine(
+          (type) => ['image/jpeg', 'image/png', 'image/webp'].includes(type),
+          "Only JPEG, PNG, and WebP images are allowed"
+        )
+      }).optional()
+})
+
 export const userIdParamSchema = z.object({
     userId: z.uuid("Invalid user ID format"),
 });
@@ -30,4 +41,5 @@ export const userIdParamSchema = z.object({
 export type RegisterUserInput = z.infer<typeof RegisterUserSchema>;
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>; 
 export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;
+export type UpdateAvatarInput = z.infer<typeof updateAvatarSchema>;
 export type UserIdParamInput = z.infer<typeof userIdParamSchema>;

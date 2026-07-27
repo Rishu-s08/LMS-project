@@ -15,6 +15,16 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7-alpine
+    container_name: lms_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    # Restricts memory usage so Redis never consumes all your system RAM
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
   # Node.js Application Service
   app:
     build: .
@@ -26,6 +36,7 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgresdb:5432/${DB_NAME}
+      - REDIS_URL=redis://redis:6379
       - DB_HOST=postgresdb
       - CHOKIDAR_USEPOLLING=true
       - DB_USER=${DB_USER}
@@ -36,6 +47,7 @@ services:
       - DB_PORT=5432
     depends_on:
       - postgresdb
+      - redis
     volumes:
       - .:/app               
       - /app/node_modules

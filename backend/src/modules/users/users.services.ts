@@ -6,6 +6,8 @@ import { refreshTokenService } from "../authentication/refreshToken/refreshToken
 import type { RegisterUserInput } from "./user.validation.js";
 import UserRepository from "./users.repository.js";
 import bcrypt from "bcrypt";
+import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
+import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 
 export class UserService {
     private userRepository: UserRepository;
@@ -134,5 +136,65 @@ export class UserService {
 
         const { password, ...userWithoutPassword } = data;
         return userWithoutPassword;
+    }
+
+    async getAllUsers(){
+        return await this.userRepository.findAll();
+    }
+
+    async updateAvatar(userId: string, file: Express.Multer.File | null){
+        const user = await this.userRepository.findByUserId(userId);
+        if(!user){
+            throw new ApiError(404, "User not found");
+        }
+        if(!file){
+            throw new ApiError(400, "No avatar file provided");
+        }
+
+        // Upload new avatar to Supabase
+        const avatarUrl = await uploadToCloud(file, SupabaseConstants.profilePicturesBucket);
+
+        // Delete old avatar from cloud if it exists
+        if(user.avatarUrl){
+            await deleteFromCloud(user.avatarUrl, SupabaseConstants.profilePicturesBucket);
+        }
+
+        const updated = await this.userRepository.updateAvatar(userId, avatarUrl);
+        const { password, ...userWithoutPassword } = updated;
+        return userWithoutPassword;
+    }
+
+    async deactivateUser(userId: string){
+        const user = await this.userRepository.findByUserId(userId);
+        if(!user){
+            throw new ApiError(404, "User not found");
+        }
+        if(!user.isActive){
+            throw new ApiError(400, "User is already deactivated");
+        }
+        const updated = await this.userRepository.deactivateUser(userId);
+        const { password, ...userWithoutPassword } = updated;
+        return userWithoutPassword;
+    }
+
+    async activateUser(userId: string){
+        const user = await this.userRepository.findByUserId(userId);
+        if(!user){
+            throw new ApiError(404, "User not found");
+        }
+        if(user.isActive){
+            throw new ApiError(400, "User is already active");
+        }
+        const updated = await this.userRepository.activateUser(userId);
+        const { password, ...userWithoutPassword } = updated;
+        return userWithoutPassword;
+    }
+
+    async deleteUser(userId: string){
+        const user = await this.userRepository.findByUserId(userId);
+        if(!user){
+            throw new ApiError(404, "User not found");
+        }
+        await this.userRepository.deleteUser(userId);
     }
 }
