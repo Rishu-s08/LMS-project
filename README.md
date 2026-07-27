@@ -24,6 +24,7 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | **Submissions** | Students submit work against assignments, ownership + deadline enforcement |
 | **Announcements** | Faculty/admin announcements to classes, enrollment-gated for students |
 | **Infrastructure** | Docker + Docker Compose setup, Prisma migrations, centralized error handling |
+| **Caching** | Redis read-through cache on all GET endpoints, pattern-based invalidation on writes |
 | **Middleware** | JWT auth, RBAC (role-based access), Zod body + params validation, Multer file upload |
 
 ### 📋 Planned
@@ -41,6 +42,7 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 |-------|------------|
 | Backend | Express 5 · TypeScript 6 · Node.js 20 |
 | Database | PostgreSQL 15 · Prisma 7.8 (PrismaPg adapter) |
+| Caching | Redis 7 · ioredis |
 | Auth | JWT (access + refresh tokens) · bcrypt · crypto |
 | File Storage | Supabase Storage · Multer |
 | Validation | Zod 4 |

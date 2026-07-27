@@ -605,6 +605,71 @@ Hard delete — announcements are ephemeral by nature.
 | Hard delete | No archival value — once deleted, it's gone. Unlike courses/classes, announcements don't have cascading dependencies. |
 | No file attachment (yet) | Validation schema has the `file` field defined as optional/future. Currently text-only. |
 
+### 14. Redis Caching Layer
+
+A read-through caching layer using Redis (ioredis) sits between the service and repository layers. Every GET endpoint checks Redis first; writes invalidate relevant cache entries.
+
+**Architecture:**
+
+```
+Request → Controller → Service → [Redis Cache] → Repository → PostgreSQL
+                                     ↑ HIT: return cached JSON
+                                     ↓ MISS: query DB → cache result → return
+```
+
+**Cache Strategy:**
+
+| Pattern | Description |
+|---------|-------------|
+| Read-through | `getJson(key)` → if null, fetch from DB, `setJson(key, data, TTL)` |
+| Write-invalidate | On create/update/delete, `invalidateByPattern("lms:<module>:*")` clears all keys for that module |
+| TTL-based expiry | Default 1 hour (3600s). Redis auto-evicts expired keys. |
+| Graceful degradation | `maxRetriesPerRequest: null` + `retryStrategy` — if Redis is down, requests fall through to DB silently |
+
+**Key Naming Convention:**
+
+```
+lms:<module>:<identifier>
+
+Examples:
+  lms:assignments:all                    # All assignments
+  lms:assignments:<assignmentId>         # Single assignment
+  lms:assignments:class:<classId>        # Assignments for a class
+  lms:classes:all                        # All classes
+  lms:classes:<classId>                  # Single class
+  lms:classes:faculty:<facultyId>        # Classes by faculty
+  lms:courses:all                        # All courses
+  lms:courses:<courseId>                 # Single course
+  lms:courses:code:<courseCode>          # Course by code
+  lms:enrollments:<enrollmentId>         # Single enrollment
+  lms:enrollments:class:<classId>        # Students in a class
+  lms:enrollments:student:<studentId>    # Classes for a student
+  lms:submissions:<submissionId>         # Single submission
+  lms:submissions:assignment:<id>        # Submissions for an assignment
+  lms:submissions:student:<studentId>    # Submissions by student
+  lms:resources:all                      # All resources
+  lms:resources:<resourceId>             # Single resource
+  lms:resources:class:<classId>          # Resources for a class
+```
+
+**Invalidation Flow (write operations):**
+
+```
+Client                      Server
+  │                            │
+  │─── POST/PATCH/DELETE ─────→│
+  │                            ├─ Execute DB write
+  │                            ├─ SCAN "lms:<module>:*"
+  │                            ├─ DEL all matching keys (pipelined)
+  │                            │
+  │←── Response ───────────────│
+```
+
+**Modules cached:** Assignments, Classes, Courses, Enrollments, Resources, Submissions.
+**Not cached:** Authentication (security-sensitive), Users (low-volume), Announcements (time-sensitive, low-volume).
+
+**Docker setup:** Redis 7 (Alpine) with 256MB memory limit + `allkeys-lru` eviction policy. Data persisted via named volume.
+
 ---
 
 ## Database Schema (ERD)
@@ -720,6 +785,7 @@ Response ←────────────────────── e
 | Language    | TypeScript 6 (strict)   |
 | ORM         | Prisma 7.8 + PrismaPg   |
 | Database    | PostgreSQL 15           |
+| Caching     | Redis 7 + ioredis       |
 | Validation  | Zod 4                  |
 | Auth        | jsonwebtoken + bcrypt   |
 | File Storage| Supabase Storage        |

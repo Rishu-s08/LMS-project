@@ -1,5 +1,6 @@
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
 import { AssignmentsService } from "../assignments/assignments.service.js";
 import { EnrollmentsService } from "../enrollments/enrollments.service.js";
@@ -21,22 +22,37 @@ export class SubmissionsService{
     }
 
     async getAllSubmissionsForAssignment(assignmentId: string) {
+        const cachedSubmissions = await cacheManager.getJson(cacheKeys.submissionsByAssignment(assignmentId));
+        if(cachedSubmissions != null){
+            return cachedSubmissions;
+        }
         const assignment = await this.assignmentService.getAssignmentById(assignmentId);
         if(!assignment){
             throw new ApiError(404, "Assignment not found");
         }
-        return await this.submissionsRepository.getAllSubmissionsForAssignment(assignmentId);
+        const submissions = await this.submissionsRepository.getAllSubmissionsForAssignment(assignmentId);
+        await cacheManager.setJson(cacheKeys.submissionsByAssignment(assignmentId), submissions);
+        return submissions;
     }
 
     async getSubmissionById(submissionId: string) {
+        const cachedSubmission = await cacheManager.getJson(cacheKeys.submissions(submissionId));
+        if(cachedSubmission != null){
+            return cachedSubmission;
+        }
         const submission = await this.submissionsRepository.getSubmissionById(submissionId);
         if(!submission){
             throw new ApiError(404, "Submission not found");
         }
+        await cacheManager.setJson(cacheKeys.submissions(submissionId), submission);
         return submission;
     }
 
     async getMySubmissionsForAssignment(assignmentId: string, studentId: string) {
+        const cachedSubmissions = await cacheManager.getJson(cacheManager.createDoubleIdentifierCacheKey(CacheKeyPrefix.SUBMISSIONS, assignmentId, studentId));
+        if(cachedSubmissions != null){
+            return cachedSubmissions;
+        }
         const assignment = await this.assignmentService.getAssignmentById(assignmentId);
         if(!assignment){
             throw new ApiError(404, "Assignment not found");
@@ -45,7 +61,9 @@ export class SubmissionsService{
         if(!student){
             throw new ApiError(404, "Student not found");
         }
-        return await this.submissionsRepository.getMySubmissionsForAssignment(assignmentId, studentId);
+        const submissions = await this.submissionsRepository.getMySubmissionsForAssignment(assignmentId, studentId);
+        await cacheManager.setJson(cacheManager.createDoubleIdentifierCacheKey(CacheKeyPrefix.SUBMISSIONS, assignmentId, studentId), submissions);
+        return submissions;
     }
 
     async createSubmission(data: CreateSubmissionInput, userId : string, file: Express.Multer.File | null) {
@@ -78,6 +96,7 @@ export class SubmissionsService{
         }
 
         const newSubmission = await this.submissionsRepository.createSubmission(data, attachmentUrl || null);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.SUBMISSIONS, "*"));
         return newSubmission;
 
     }
@@ -113,6 +132,7 @@ export class SubmissionsService{
         }
 
         const updatedSubmission = await this.submissionsRepository.updateSubmission(submissionId, data, attachmentUrl || null);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.SUBMISSIONS, "*"));
         return updatedSubmission;
     }
 
@@ -137,6 +157,7 @@ export class SubmissionsService{
         }
 
         await this.submissionsRepository.deleteSubmission(submissionId);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.SUBMISSIONS, "*"));
     }
 
 }

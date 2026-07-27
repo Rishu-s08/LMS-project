@@ -15,13 +15,13 @@ cd backend
 docker-compose up --build
 ```
 
-The app will be available at `http://localhost:8000`. PostgreSQL runs on port `5432`.
+The app will be available at `http://localhost:8000`. PostgreSQL runs on port `5432`. Redis runs on port `6379`.
 
 Migrations run automatically on container startup (`prisma migrate deploy`).
 
 ### Without Docker
 
-Requires Node.js 20+ and a running PostgreSQL instance.
+Requires Node.js 20+ and a running PostgreSQL instance. Redis is optional (falls back to DB queries if unavailable).
 
 ```bash
 cd backend
@@ -40,6 +40,7 @@ Set environment variables in `.env` (see below).
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `DATABASE_URL` | PostgreSQL connection string | — |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
 | `PORT` | Server port | `3000` |
 | `ACCESS_TOKEN_SECRET` | JWT signing secret for access tokens | — |
 | `ACCESS_TOKEN_EXPIRY` | Access token TTL | `15m` |
@@ -162,7 +163,8 @@ backend/
 │   ├── app.ts                    # Express app setup + route mounting
 │   ├── server.ts                 # HTTP server bootstrap
 │   ├── config/
-│   │   └── config.ts             # Environment variable loader
+│   │   ├── config.ts             # Environment variable loader
+│   │   └── redis.config.ts       # Redis client (ioredis) setup
 │   ├── db/
 │   │   └── prisma.ts             # Prisma client with PrismaPg adapter
 │   ├── middlewares/
@@ -172,7 +174,9 @@ backend/
 │   │   └── error.middleware.ts   # Centralized error handler
 │   ├── shared/
 │   │   ├── errors/api_error.ts   # Custom ApiError class
-│   │   ├── utils/asyncHandler.ts # Async error wrapper
+│   │   ├── utils/
+│   │   │   ├── asyncHandler.ts   # Async error wrapper
+│   │   │   └── redis.utils.ts    # Cache manager (getOrSet, invalidate, key generators)
 │   │   └── constants/enums.ts    # Role enum
 │   └── modules/
 │       ├── authentication/
@@ -204,6 +208,9 @@ backend/
 | `dev` | `tsx watch --no-cache src/server.ts` | Start dev server with hot reload |
 | `build` | `tsc` | Compile TypeScript to `dist/` |
 | `start` | `node dist/server.js` | Run compiled production build |
+| `seed` | `tsx prisma/seed.ts` | Seed database with demo data |
+| `db:reset` | `tsx prisma/reset.ts` | Clear all data and reseed |
+| `db:fresh` | `prisma migrate reset --force && npm run seed` | Reset migrations + seed |
 
 ---
 

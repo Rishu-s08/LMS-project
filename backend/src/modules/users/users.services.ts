@@ -8,6 +8,7 @@ import UserRepository from "./users.repository.js";
 import bcrypt from "bcrypt";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
+import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 
 export class UserService {
     private userRepository: UserRepository;
@@ -31,20 +32,26 @@ export class UserService {
 
         //strip password before returning user object
         const { password, ...userWithoutPassword } = user;
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
         return userWithoutPassword;
     }
 
     async getUserById(userId: string){
+        const cachedUser = await cacheManager.getJson(cacheKeys.user(userId));
+        if(cachedUser != null){
+            return cachedUser;
+        }
         const user = await this.userRepository.findByUserId(userId);
         if(!user){
             throw new ApiError(404, "User not found");
         }
         //strip password before returning user object
         const { password, ...userWithoutPassword } = user;
+        await cacheManager.setJson(cacheKeys.user(userId), userWithoutPassword);
         return userWithoutPassword;
     }
 
-    async getUserByIdWithPass(userId: string, tx?: Prisma.TransactionClient){
+    private async getUserByIdWithPass(userId: string, tx?: Prisma.TransactionClient){
         const client = tx || prisma;
         const user = await client.user.findUnique({
             where: {
@@ -54,27 +61,36 @@ export class UserService {
         if(!user){
             throw new ApiError(404, "User not found");
         }
-        //strip password before returning user object
         return user;
     }
 
     async getUserByEmail(email: string){
+        const cachedUser = await cacheManager.getJson(cacheKeys.user(email));
+        if(cachedUser != null){
+            return cachedUser;
+        }
         const user = await this.userRepository.findByEmail(email);
         if(!user){
             throw new ApiError(404, "User not found");
         }
         //strip password before returning user object
         const { password, ...userWithoutPassword } = user;
+        await cacheManager.setJson(cacheKeys.user(email), userWithoutPassword);
         return userWithoutPassword;
     }
 
     async getProfile(userId: string){
+        const cachedUser = await cacheManager.getJson(cacheKeys.user(userId));
+        if(cachedUser != null){
+            return cachedUser;
+        }
         const user = await this.userRepository.findByUserId(userId);
         if(!user){
             throw new ApiError(404, "User not found");
         }
         //strip password before returning user object
         const { password, ...userWithoutPassword } = user;
+        await cacheManager.setJson(cacheKeys.user(userId), userWithoutPassword);
         return userWithoutPassword;
     }
 
@@ -135,11 +151,18 @@ export class UserService {
         const data =  await this.userRepository.updateUserRole(userId, role);
 
         const { password, ...userWithoutPassword } = data;
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
         return userWithoutPassword;
     }
 
     async getAllUsers(){
-        return await this.userRepository.findAll();
+        const cachedUsers = await cacheManager.getJson(cacheKeys.users());
+        if(cachedUsers != null){
+            return cachedUsers;
+        }
+        const users =  await this.userRepository.findAll();
+        await cacheManager.setJson(cacheKeys.users(), users);
+        return users;
     }
 
     async updateAvatar(userId: string, file: Express.Multer.File | null){
@@ -161,6 +184,7 @@ export class UserService {
 
         const updated = await this.userRepository.updateAvatar(userId, avatarUrl);
         const { password, ...userWithoutPassword } = updated;
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
         return userWithoutPassword;
     }
 
@@ -174,6 +198,7 @@ export class UserService {
         }
         const updated = await this.userRepository.deactivateUser(userId);
         const { password, ...userWithoutPassword } = updated;
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
         return userWithoutPassword;
     }
 
@@ -187,6 +212,7 @@ export class UserService {
         }
         const updated = await this.userRepository.activateUser(userId);
         const { password, ...userWithoutPassword } = updated;
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
         return userWithoutPassword;
     }
 
@@ -194,7 +220,8 @@ export class UserService {
         const user = await this.userRepository.findByUserId(userId);
         if(!user){
             throw new ApiError(404, "User not found");
-        }
+        }      
         await this.userRepository.deleteUser(userId);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
     }
 }

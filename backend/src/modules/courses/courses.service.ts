@@ -1,4 +1,5 @@
 import { ApiError } from "../../shared/errors/api_error.js";
+import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { CoursesRepository } from "./courses.repository.js";
 import type { CreateCourseInput } from "./courses.validation.js";
 
@@ -12,27 +13,45 @@ export class CoursesService {
     }
 
     async getAllCourses() {
-        return await this.coursesRepository.getAllCourses();
+        const cachedCourses = await cacheManager.getJson(cacheKeys.courses());
+        if(cachedCourses != null){
+            return cachedCourses;
+        }
+        const courses = await this.coursesRepository.getAllCourses();
+        await cacheManager.setJson(cacheKeys.courses(), courses);
+        return courses;
     }
 
     async getCourseById(courseId: string) {
+        const cachedCourse = await cacheManager.getJson(cacheKeys.course(courseId));
+        if(cachedCourse != null){
+            return cachedCourse;
+        }
         const course = await this.coursesRepository.getCourseById(courseId);
         if (!course) {
-            throw new ApiError(404, `Course with ID ${courseId} not found.`);
+            throw new ApiError(404, `Course not found.`);
         }
+        await cacheManager.setJson(cacheKeys.course(courseId), course);
         return course;
     }
 
     async getCourseByCode(courseCode: string) {
+        const cachedCourse = await cacheManager.getJson(cacheKeys.courseByCode(courseCode));
+        if(cachedCourse != null){
+            return cachedCourse;
+        }
         const course =  await this.coursesRepository.getCourseByCode(courseCode);
         if (!course) {
             throw new ApiError(404, `Course with code ${courseCode} not found.`);
         }
+        await cacheManager.setJson(cacheKeys.courseByCode(courseCode), course);
         return course;
     }
 
     async createCourse(data: CreateCourseInput) {
-        return await this.coursesRepository.createCourse(data);
+        const newCourse = await this.coursesRepository.createCourse(data);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.COURSES, "*"));
+        return newCourse;
     }
 
     async archiveCourse(courseId: string) {
@@ -40,7 +59,10 @@ export class CoursesService {
         if (!course) {
             throw new ApiError(404, `Course with ID ${courseId} not found.`);
         }
-        return await this.coursesRepository.archiveCourse(courseId);
+
+        const archivedCourse = await this.coursesRepository.archiveCourse(courseId);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.COURSES, "*"));
+        return archivedCourse;
     }
 
     async unarchiveCourse(courseId: string) {
@@ -48,7 +70,9 @@ export class CoursesService {
         if (!course) {
             throw new ApiError(404, `Course with ID ${courseId} not found.`);
         }
-        return await this.coursesRepository.unarchiveCourse(courseId);
+        const unarchivedCourse = await this.coursesRepository.unarchiveCourse(courseId);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.COURSES, "*"));
+        return unarchivedCourse;
     }
 
     async updateCourse(courseId: string, data: Partial<CreateCourseInput>) {
@@ -56,6 +80,8 @@ export class CoursesService {
         if (!course) {
             throw new ApiError(404, `Course with ID ${courseId} not found.`);
         }
-        return await this.coursesRepository.updateCourse(courseId, data);
+        const updatedCourse = await this.coursesRepository.updateCourse(courseId, data);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.COURSES, "*"));
+        return updatedCourse;
     }
 }

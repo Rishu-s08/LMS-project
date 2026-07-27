@@ -4,6 +4,7 @@ import { assignmentRepository } from "./assignments.repository.js";
 import type { CreateAssignmentInput } from "./assignments.validation.js";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
+import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 
 export class AssignmentsService{
     private readonly assignmentsRepository: assignmentRepository;
@@ -15,24 +16,48 @@ export class AssignmentsService{
     }
 
     async getAssignments(){
+
+        const cachedAssignments = await cacheManager.getJson(cacheKeys.assignments()); 
+
+        if(cachedAssignments != null){
+            return cachedAssignments;
+        }
+
         const assignments = await this.assignmentsRepository.getAssignments();
+        await cacheManager.setJson(cacheKeys.assignments(), assignments);
         return assignments;
     }
 
     async getAssignmentById(assignmentId: string){
+
+        const assignmentCacheKey = cacheKeys.assignment(assignmentId);
+        const cachedAssignment = await cacheManager.getJson(assignmentCacheKey);
+        if(cachedAssignment != null){
+            return cachedAssignment;
+        }
+
         const assignment = await this.assignmentsRepository.getAssignmentById(assignmentId);
         if(!assignment){
             throw new ApiError(404, `Assignment not found.`);
         }
+        await cacheManager.setJson(assignmentCacheKey, assignment);
         return assignment;
     }
 
     async getAssignmentsByClassId(classId: string){
+
         const classData = await this.classesService.getClassById(classId);
         if(!classData){
             throw new ApiError(404, "Class not found");
         }
+
+        const cachedAssignments = await cacheManager.getJson(cacheKeys.classAssignments(classId));
+        if(cachedAssignments != null){
+            return cachedAssignments;
+        }
+
         const assignments = await this.assignmentsRepository.getAssignmentsByClassId(classId);
+        await cacheManager.setJson(cacheKeys.classAssignments(classId), assignments);
         return assignments;
     }
 
@@ -52,7 +77,11 @@ export class AssignmentsService{
             attachmentUrl = await uploadToCloud(file, SupabaseConstants.assignmentsBucket);
         }
 
+
         const assignment = await this.assignmentsRepository.createAssignment(data, attachmentUrl);
+
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ASSIGNMENTS, "*")); // Invalidate all assignments cache
+
         return assignment;
     } 
 
@@ -81,16 +110,14 @@ export class AssignmentsService{
 
         if (file) {
             newAttachmentUrl = await uploadToCloud(file, SupabaseConstants.assignmentsBucket);
-            
             if(attachmentUrl){
                 await deleteFromCloud(attachmentUrl, SupabaseConstants.assignmentsBucket);
             }
-
-            // Optional optimization tip: You could call supabase.storage.from().remove() here 
-            // on assignment.attachmentUrl path to wipe the old file out of the cloud!
         }
-
         const updatedAssignment = await this.assignmentsRepository.updateAssignment(assignmentId, data, newAttachmentUrl);
+
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ASSIGNMENTS, "*")); // Invalidate all assignments cache
+
         return updatedAssignment;
     }
 
@@ -103,6 +130,7 @@ export class AssignmentsService{
         if(assignment.attachmentUrl){
             await deleteFromCloud(assignment.attachmentUrl, SupabaseConstants.assignmentsBucket);
         }
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ASSIGNMENTS, "*")); // Invalidate all assignments cache
         return deletedAssignment;
     }
 }

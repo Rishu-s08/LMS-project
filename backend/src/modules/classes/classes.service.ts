@@ -1,5 +1,6 @@
 import { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { CoursesService } from "../courses/courses.service.js";
 import { UserService } from "../users/users.services.js";
 import { ClassesRepository } from "./classes.repository.js";
@@ -18,12 +19,24 @@ export class ClassesService {
     }
 
     async getAllClasses() {
+
+        const cachedClasses = await cacheManager.getJson(cacheKeys.classes());
+        if(cachedClasses != null){
+            return cachedClasses;
+        }
+
         const classes = await this.classesRepository.getAllClasses();
+        await cacheManager.setJson(cacheKeys.classes(), classes);
         return classes;
     }
 
     async getClassById(classId: string) {
+        const cachedClass = await cacheManager.getJson(cacheKeys.class(classId));
+        if(cachedClass != null){
+            return cachedClass;
+        }
         const classData = await this.classesRepository.getClassById(classId);
+        await cacheManager.setJson(cacheKeys.class(classId), classData);
         return classData;
     }
 
@@ -31,24 +44,32 @@ export class ClassesService {
         // check if the faculty exists and is not a student
         const faculty = await this.userService.getUserById(data.facultyId);
         if(faculty?.role === roles.STUDENT) {
-            throw new ApiError(400, `User with ID ${data.facultyId} is not a faculty member.`);
+            throw new ApiError(400, `User is not a faculty member.`);
         }
 
         // check if the course exists
         await this.courseService.getCourseById(data.courseId);
+
         const newClass = await this.classesRepository.createClass(data);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.CLASSES, "*"));
         return newClass;
     }
 
     async getClassesByFacultyId(facultyId: string) {
+        const cachedClasses = await cacheManager.getJson(cacheKeys.classesByFaculty(facultyId));
+        if(cachedClasses != null){
+            return cachedClasses;
+        }
+
         const classes = await this.classesRepository.getClassesByFacultyId(facultyId);
+        await cacheManager.setJson(cacheKeys.classesByFaculty(facultyId), classes);
         return classes;
     }
 
     async getFaculty(facultyId: string) {
         const faculty = await this.userService.getUserById(facultyId);
         if(!faculty || faculty?.role === roles.STUDENT) {
-            throw new ApiError(400, `User with ID ${facultyId} is not a faculty member.`);
+            throw new ApiError(400, `User is not a faculty member.`);
         }
         return faculty;
     }
@@ -58,7 +79,9 @@ export class ClassesService {
         if (!classData) {
             throw new ApiError(404, `Class with ID ${classId} not found.`);
         }
-        return await this.classesRepository.archiveClass(classId);
+        const data = await this.classesRepository.archiveClass(classId);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.CLASSES, "*"));
+        return data;
     }
 
     async unarchiveClass(classId: string) {
@@ -66,7 +89,9 @@ export class ClassesService {
         if (!classData) {
             throw new ApiError(404, `Class with ID ${classId} not found.`);
         }
-        return await this.classesRepository.unarchiveClass(classId);
+        const data = await this.classesRepository.unarchiveClass(classId);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.CLASSES, "*"));
+        return data;
     }
 
 
@@ -83,6 +108,8 @@ export class ClassesService {
             // check if the course exists
             await this.courseService.getCourseById(data.courseId);
         }
-        return await this.classesRepository.updateClass(classId, data);
+        const updatedClass = await this.classesRepository.updateClass(classId, data);
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.CLASSES, "*"));
+        return updatedClass;
     }
 }
