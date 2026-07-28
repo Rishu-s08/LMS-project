@@ -7,5 +7,6 @@ export const routingKeys = {
     assignmentCreated: "assignment.created",
     resourceCreated: "resource.created",
     classroomCreated: "classroom.created",
+    announcementCreated: "announcement.created",
 }
 

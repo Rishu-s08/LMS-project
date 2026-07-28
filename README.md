@@ -112,6 +112,16 @@ npm run dev
 
 ---
 
+## System Design
+
+![System Design](./docs/image.png)
+
+## Database Schema
+
+![ERD](./docs/image1.png)
+
+---
+
 ## Architecture Highlights
 
 - **Layered modules** — Each domain follows Route → Controller → Service → Repository

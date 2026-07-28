@@ -1,5 +1,8 @@
 import { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
+import { publishEvent } from "../../config/rabbitmq.js";
+import { routingKeys } from "../../shared/constants/constants.js";
 import { ClassesService } from "../classes/classes.service.js";
 import { EnrollmentsService } from "../enrollments/enrollments.service.js";
 import { UserService } from "../users/users.services.js";
@@ -49,7 +52,15 @@ export class AnnouncementServices {
         if (!classData) {
             throw new ApiError(404, "Class not found");
         }
-        return await this.announcementsRepository.createAnnouncement(data);
+        const announcement = await this.announcementsRepository.createAnnouncement(data);
+
+        publishEvent(routingKeys.announcementCreated, {
+            announcementId: announcement.announcementId,
+            classId: announcement.classId,
+        });
+
+        logger.info({ announcementId: announcement.announcementId, classId: announcement.classId }, "Announcement created");
+        return announcement;
     }
 
     async updateAnnouncement(announcementId: string, data: Partial<CreateAnnouncementInput>) {

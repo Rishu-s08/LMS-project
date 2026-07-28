@@ -48,3 +48,16 @@ export const handleClassroomCreatedEvent = async (event: any) => {
 
     logger.info({ classId, studentCount: students.length }, "Classroom notifications dispatched");
 }
+
+export const handleAnnouncementCreatedEvent = async (event: any) => {
+    const { announcementId, classId } = event;
+
+    const students = await enrollmentRepo.getStudentsByClassId(classId);
+
+    for (const enrollment of students) {
+        // TODO: send FCM / email
+        logger.info({ studentId: enrollment.studentId, announcementId }, "Notify student: new announcement");
+    }
+
+    logger.info({ announcementId, classId, studentCount: students.length }, "Announcement notifications dispatched");
+}
