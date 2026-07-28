@@ -1,8 +1,4 @@
-import { prisma } from "../../db/prisma.js";
-import type { Prisma } from "../../generated/prisma/client.js";
-import type { CreateEnrollmentInput } from "./enrollment.validation.js";
-
-
+import { prisma } from "../db/prisma.js";
 
 export class EnrollmentsRepository{
 
@@ -18,15 +14,6 @@ export class EnrollmentsRepository{
             }
         });
         return enrollment;
-    }
-
-    async createEnrollment(data: CreateEnrollmentInput, tx?: Prisma.TransactionClient){
-        const client = tx || prisma;
-        const newEnrollment = await client.enrollment.create({
-            data
-        });
-
-        return newEnrollment;
     }
 
     async deleteEnrollment(enrollmentId: string){

@@ -165,6 +165,17 @@ export class UserService {
         return users;
     }
 
+    async getAllStudentsWithBranchAndSem(branch: string, sem: number){
+        const cachedStudents = await cacheManager.getJson(cacheKeys.studentsWithBranchAndSem(branch, sem));
+        if(cachedStudents != null){
+            return cachedStudents;
+        }
+        const students =  await this.userRepository.findAllStudentsWithBranchAndSem(branch, sem);
+        await cacheManager.setJson(cacheKeys.studentsWithBranchAndSem(branch, sem), students);
+        return students;
+        
+    }
+
     async updateAvatar(userId: string, file: Express.Multer.File | null){
         const user = await this.userRepository.findByUserId(userId);
         if(!user){

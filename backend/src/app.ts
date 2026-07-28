@@ -8,6 +8,9 @@ import { redisClient } from "./config/redis.config.js";
 const app = express();
 
 app.use(express.json());
+
+app.use(pinoHttp({ logger }));
+
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // limit each IP to 100 requests per windowMs
@@ -80,8 +83,13 @@ app.use("/api/v1/submissions", submissionRoutes);
 
 // announcements Route
 import announcementRoutes from "./modules/announcements/annoucements.routes.js";
+import { logger } from "./shared/utils/logger.util.js";
 app.use("/api/v1/announcements", announcementRoutes);
 
 app.use(errorHandler);
 
 export default app;
+function pinoHttp(arg0: { logger: any; }): any {
+  throw new Error("Function not implemented.");
+}
+

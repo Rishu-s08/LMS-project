@@ -1,6 +1,6 @@
 import { prisma } from "../../db/prisma.js";
 import type { Prisma } from "../../generated/prisma/browser.js";
-import type { roles } from "../../shared/constants/enums.js";
+import { roles } from "../../shared/constants/enums.js";
 import type { RegisterUserInput } from "./user.validation.js";
 
 class UserRepository {
@@ -21,6 +21,16 @@ class UserRepository {
                 updatedAt: true,
             },
             orderBy: { createdAt: "desc" }
+        })
+    }
+
+    async findAllStudentsWithBranchAndSem(branch: string, sem: number){
+        return await prisma.user.findMany({
+            where: {
+                role: roles.STUDENT,
+                branch: branch,
+                sem: sem
+            }
         })
     }
 

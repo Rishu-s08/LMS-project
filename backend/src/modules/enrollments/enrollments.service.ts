@@ -1,7 +1,8 @@
+import { prisma } from "../../db/prisma.js";
 import { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
-import { ClassesService } from "../classes/classes.service.js";
+import { ClassesRepository } from "../classes/classes.repository.js";
 import { UserService } from "../users/users.services.js";
 import type { CreateEnrollmentInput } from "./enrollment.validation.js";
 import { EnrollmentsRepository } from "./enrollments.repository.js";
@@ -12,11 +13,11 @@ import { EnrollmentsRepository } from "./enrollments.repository.js";
 export class EnrollmentsService {
     private readonly enrollmentsRepository: EnrollmentsRepository;
     private readonly userService: UserService;
-    private readonly classesService: ClassesService;
+    private readonly classesRepository: ClassesRepository;
     constructor(){
         this.enrollmentsRepository = new EnrollmentsRepository();
         this.userService = new UserService();
-        this.classesService = new ClassesService();
+        this.classesRepository = new ClassesRepository();
     }
 
     async getEnrollmentById(enrollmentId: string) {
@@ -37,7 +38,7 @@ export class EnrollmentsService {
         if(!user || user.role !== roles.STUDENT){
             throw new ApiError(404, `User not found.`);
         }
-        const classData = await this.classesService.getClassById(data.classId);
+        const classData = await this.classesRepository.getClassById(data.classId);
         if(!classData){
             throw new ApiError(404, "Class not found");
         }
@@ -49,6 +50,35 @@ export class EnrollmentsService {
         const newEnrollment = await this.enrollmentsRepository.createEnrollment(data);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ENROLLMENTS, "*"));
         return newEnrollment;
+    }
+
+    async createEnrollmentWithAllStudentsBelongsToSameSemAndBranch(classSem : number, classBranch : string, classId : string){
+
+        const classData = await this.classesRepository.getClassById(classId);
+
+        if(!classData){
+            throw new ApiError(404, "Class not found");
+        }
+
+        // get all the students belongs to the same sem and branch
+        const students = await this.userService.getAllStudentsWithBranchAndSem(classBranch, classSem);
+
+        const enrollmentsToCreate = students.map((student : { userId: string }) => ({
+            studentId: student.userId,
+            classId: classId
+        }));
+
+        const createdEnrollments : any[] = [];
+        await prisma.$transaction(async (tx) => {
+            for (const enrollmentData of enrollmentsToCreate) {
+                const newEnrollment = await this.enrollmentsRepository.createEnrollment(enrollmentData, tx);
+                createdEnrollments.push(newEnrollment);
+            }
+        });
+
+        await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ENROLLMENTS, "*"));
+        return createdEnrollments;
+
     }
 
     async deleteEnrollment(enrollmentId: string) {
@@ -65,7 +95,7 @@ export class EnrollmentsService {
         if(cachedStudents != null){
             return cachedStudents;
         }
-        const classData = await this.classesService.getClassById(classId as string);
+        const classData = await this.classesRepository.getClassById(classId as string);
         if(!classData){
             throw new ApiError(404, "Class not found");
         }

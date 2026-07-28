@@ -95,6 +95,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgresdb:5432/${DB_NAME}
       - REDIS_URL=redis://redis:6379
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       postgresdb:
         condition: service_healthy

@@ -21,6 +21,9 @@ build/
 # Prisma generated client
 **/src/generated/
 
+# Documentation (personal)
+DOCKER.md
+
 # OS files
 .DS_Store
 Thumbs.db

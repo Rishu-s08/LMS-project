@@ -1,7 +1,10 @@
+import { publishEvent } from "../../config/rabbitmq.js";
+import { routingKeys } from "../../shared/constants/constants.js";
 import { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { CoursesService } from "../courses/courses.service.js";
+import { EnrollmentsService } from "../enrollments/enrollments.service.js";
 import { UserService } from "../users/users.services.js";
 import { ClassesRepository } from "./classes.repository.js";
 import type { CreateClassInput, UpdateClassInput } from "./classes.validation.js";
@@ -11,11 +14,13 @@ export class ClassesService {
     private readonly classesRepository: ClassesRepository;
     private readonly userService: UserService;
     private readonly courseService: CoursesService;
+    private readonly enrollmentsService: EnrollmentsService;
 
     constructor() {
         this.classesRepository = new ClassesRepository();
         this.userService = new UserService();
         this.courseService = new CoursesService();
+        this.enrollmentsService = new EnrollmentsService();
     }
 
     async getAllClasses() {
@@ -52,6 +57,13 @@ export class ClassesService {
 
         const newClass = await this.classesRepository.createClass(data);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.CLASSES, "*"));
+        
+        await this.enrollmentsService.createEnrollmentWithAllStudentsBelongsToSameSemAndBranch(data.semester, data.branch, newClass.classId);
+
+        await publishEvent(routingKeys.classroomCreated, {
+            classId: newClass.classId,
+        })
+
         return newClass;
     }
 

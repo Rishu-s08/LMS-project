@@ -28,6 +28,7 @@ export const cacheKeys = {
 
     user: (identifier: string) => `lms:${CacheKeyPrefix.USERS}:${identifier}`,
     users : () => `lms:${CacheKeyPrefix.USERS}:all`,
+    studentsWithBranchAndSem : (branch: string, sem: number) => `lms:${CacheKeyPrefix.USERS}:students:${branch}:${sem}`,
 
 
     submissions: (identifier: string) => `lms:${CacheKeyPrefix.SUBMISSIONS}:${identifier}`,

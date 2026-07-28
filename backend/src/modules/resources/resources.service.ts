@@ -1,3 +1,5 @@
+import { publishEvent } from "../../config/rabbitmq.js";
+import { routingKeys } from "../../shared/constants/constants.js";
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
@@ -78,6 +80,12 @@ export class ResourcesService {
         }
         const createdResource = await this.resourcesRepository.createResource(data, attachmentUrl);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.RESOURCES, "*"));
+
+        publishEvent(routingKeys.resourceCreated, {
+            classId: createdResource.classId,
+            resourceId: createdResource.resourceId,
+        })
+
         return createdResource;
     }
 

@@ -5,6 +5,8 @@ import type { CreateAssignmentInput } from "./assignments.validation.js";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
+import { publishEvent } from "../../config/rabbitmq.js";
+import { routingKeys } from "../../shared/constants/constants.js";
 
 export class AssignmentsService{
     private readonly assignmentsRepository: assignmentRepository;
@@ -81,6 +83,11 @@ export class AssignmentsService{
         const assignment = await this.assignmentsRepository.createAssignment(data, attachmentUrl);
 
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ASSIGNMENTS, "*")); // Invalidate all assignments cache
+
+        publishEvent(routingKeys.assignmentCreated, {
+            assignmentId: assignment.assignmentId,
+            classId: assignment.classId,
+        });
 
         return assignment;
     } 
