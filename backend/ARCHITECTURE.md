@@ -689,6 +689,74 @@ Client                      Server
 
 **Docker setup:** Redis 7 (Alpine) with 256MB memory limit + `allkeys-lru` eviction policy. Data persisted via named volume.
 
+### 15. Structured Logging with Pino
+
+All logging uses **pino** (JSON in production, pretty-printed in development) with **pino-http** for automatic request/response logging.
+
+**Log Levels:**
+
+| Level | Usage |
+|-------|-------|
+| `fatal` | App cannot start (missing DB, missing env var) |
+| `error` | Unhandled exceptions, external service failures |
+| `warn` | API errors (4xx), JWT failures, rate limit hits |
+| `info` | Successful writes, connections established, server startup |
+| `debug` | Cache hits/misses, request bodies (dev only) |
+
+**What's logged:**
+- Server startup (port, environment, connection status)
+- Every HTTP request (method, URL, status code, response time) via pino-http middleware
+- Write operations (create/update/delete) with relevant IDs
+- Auth events (login, logout, password reset)
+- External service connections (Redis, RabbitMQ)
+- Errors with full context (path, method, error object)
+
+**What's NOT logged:**
+- Passwords, tokens, secrets
+- Full request/response bodies in production
+- Swagger UI requests (filtered out)
+
+**Format:**
+```typescript
+// Structured context object + message
+logger.info({ userId, email }, "User logged in");
+logger.error({ err, path: req.path }, "Unhandled server error");
+```
+
+**Why:** Structured JSON logs can be shipped to any aggregator (CloudWatch, Datadog, ELK). Pretty-print in dev keeps terminal readable. pino is 5x faster than winston — zero overhead in hot paths.
+
+### 16. Event-Driven Notifications via RabbitMQ
+
+The backend publishes domain events to RabbitMQ. A separate **notification server** consumes these events and handles async work (FCM push, email, in-app notifications).
+
+**Architecture:**
+
+```
+Backend (publisher)                    RabbitMQ                    Notification Server (consumer)
+       │                                  │                                │
+       ├─ createAssignment() ────────────→│ routing: assignment.created ──→│ fetch students → send FCM
+       ├─ createResource() ──────────────→│ routing: resource.created ────→│ fetch students → send email
+       ├─ createClass() ─────────────────→│ routing: classroom.created ───→│ notify enrolled students
+       │                                  │                                │
+```
+
+**Exchange:** `notification_exchange` (topic type, durable)
+**Routing keys:** `assignment.created`, `resource.created`, `classroom.created`
+
+**Why topic exchange:** One binding pattern (`notification.#` or specific keys) catches all relevant events. Adding new event types doesn't require consumer changes — just publish with a new key and add a handler.
+
+**Why separate server:**
+- Backend stays fast (fire-and-forget publish, ~1ms)
+- Notification failures don't affect API responses
+- Can scale notification server independently
+- Messages survive crashes (durable queue, requeue on failure)
+
+**Message flow:**
+1. Backend completes DB write
+2. Backend publishes event with minimal payload (`{ classId, assignmentId }`)
+3. Notification server consumes, fetches full data from shared DB
+4. Processes notification (FCM/email) → ACKs on success, NACKs on failure (requeued)
+
 ---
 
 ## Database Schema (ERD)
@@ -805,6 +873,8 @@ Response ←────────────────────── e
 | ORM         | Prisma 7.8 + PrismaPg   |
 | Database    | PostgreSQL 15           |
 | Caching     | Redis 7 + ioredis       |
+| Messaging   | RabbitMQ 4 + amqplib    |
+| Logging     | Pino + pino-http        |
 | Validation  | Zod 4                  |
 | Auth        | jsonwebtoken + bcrypt   |
 | File Storage| Supabase Storage        |

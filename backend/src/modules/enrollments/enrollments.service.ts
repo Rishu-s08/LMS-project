@@ -1,6 +1,7 @@
 import { prisma } from "../../db/prisma.js";
 import { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { ClassesRepository } from "../classes/classes.repository.js";
 import { UserService } from "../users/users.services.js";
@@ -77,6 +78,7 @@ export class EnrollmentsService {
         });
 
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.ENROLLMENTS, "*"));
+        logger.info({ classId, count: createdEnrollments.length }, "Bulk enrollment completed");
         return createdEnrollments;
 
     }

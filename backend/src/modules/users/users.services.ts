@@ -2,6 +2,7 @@ import { prisma } from "../../db/prisma.js";
 import type { Prisma } from "../../generated/prisma/browser.js";
 import type { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { refreshTokenService } from "../authentication/refreshToken/refreshToken.service.js";
 import type { RegisterUserInput } from "./user.validation.js";
 import UserRepository from "./users.repository.js";
@@ -33,6 +34,7 @@ export class UserService {
         //strip password before returning user object
         const { password, ...userWithoutPassword } = user;
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
+        logger.info({ userId: user.userId, email: user.email }, "User registered");
         return userWithoutPassword;
     }
 
@@ -119,6 +121,7 @@ export class UserService {
         });
 
         // login user again and return new access and refresh tokens
+        logger.info({ userId }, "Password changed, all sessions revoked");
         return {
             message: "Password changed successfully. Please login again."
         }
@@ -210,6 +213,7 @@ export class UserService {
         const updated = await this.userRepository.deactivateUser(userId);
         const { password, ...userWithoutPassword } = updated;
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
+        logger.info({ userId }, "User deactivated");
         return userWithoutPassword;
     }
 
@@ -224,6 +228,7 @@ export class UserService {
         const updated = await this.userRepository.activateUser(userId);
         const { password, ...userWithoutPassword } = updated;
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
+        logger.info({ userId }, "User activated");
         return userWithoutPassword;
     }
 
@@ -234,5 +239,6 @@ export class UserService {
         }      
         await this.userRepository.deleteUser(userId);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.USERS, "*"));
+        logger.info({ userId }, "User deleted");
     }
 }

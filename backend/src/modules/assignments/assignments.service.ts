@@ -1,4 +1,5 @@
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { ClassesService } from "../classes/classes.service.js";
 import { assignmentRepository } from "./assignments.repository.js";
 import type { CreateAssignmentInput } from "./assignments.validation.js";
@@ -89,6 +90,7 @@ export class AssignmentsService{
             classId: assignment.classId,
         });
 
+        logger.info({ assignmentId: assignment.assignmentId, classId: assignment.classId }, "Assignment created");
         return assignment;
     } 
 

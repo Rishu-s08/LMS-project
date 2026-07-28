@@ -2,6 +2,7 @@ import { publishEvent } from "../../config/rabbitmq.js";
 import { routingKeys } from "../../shared/constants/constants.js";
 import { roles } from "../../shared/constants/enums.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { CoursesService } from "../courses/courses.service.js";
 import { EnrollmentsService } from "../enrollments/enrollments.service.js";
@@ -64,6 +65,7 @@ export class ClassesService {
             classId: newClass.classId,
         })
 
+        logger.info({ classId: newClass.classId, courseId: data.courseId, facultyId: data.facultyId }, "Class created with auto-enrollment");
         return newClass;
     }
 

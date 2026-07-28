@@ -41,6 +41,8 @@ Environment variables are loaded from the root `.env` file (one level up). Set `
 |----------|-------------|---------|
 | `DATABASE_URL` | PostgreSQL connection string | — |
 | `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
+| `AMQP_URL` | RabbitMQ connection string | `amqp://guest:guest@localhost:5672` |
+| `LOG_LEVEL` | Pino log level (fatal/error/warn/info/debug) | `info` |
 | `PORT` | Server port | `3000` |
 | `ACCESS_TOKEN_SECRET` | JWT signing secret for access tokens | — |
 | `ACCESS_TOKEN_EXPIRY` | Access token TTL | `15m` |

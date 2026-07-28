@@ -1,5 +1,6 @@
 import {env} from "../../../config/config.js";
 import { ApiError } from "../../../shared/errors/api_error.js";
+import { logger } from "../../../shared/utils/logger.util.js";
 import UserRepository from "../../users/users.repository.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -46,6 +47,8 @@ export class AuthService {
 
         await this.refreshTokenRepository.createRefreshToken(user.userId, refreshJti, expiresAtDate);
 
+        logger.info({ userId: user.userId, email: user.email }, "User logged in");
+
         const { password, ...userWithoutPassword } = user;
 
         return {
@@ -78,6 +81,7 @@ export class AuthService {
             }
 
             await this.refreshTokenRepository.revokeRefreshToken(payload.jti);
+            logger.info({ userId: payload.sub }, "User logged out");
     }
 
 
@@ -93,8 +97,6 @@ export class AuthService {
         // 2. GENERATE THE RAW TOKEN: Create a 32-byte completely random string (64 characters long)
         const rawResetToken = crypto.randomBytes(32).toString("hex");
 
-        console.log("rawResetToken", rawResetToken);
-
         // 3. GENERATE THE HASH: Create a deterministic SHA-256 hash string for the database 🔒
         const encryptedTokenHash = crypto
             .createHash("sha256")
@@ -107,6 +109,8 @@ export class AuthService {
 
         // store the hashed token and expiry in the database
         await this.passTokenRepository.createPasswordToken(user.userId, encryptedTokenHash, expiresAt);
+
+        logger.info({ userId: user.userId }, "Password reset token generated");
 
 
         // For dev purposes, we will return the reset link in the response. In production, we would send this link to the user's email address.

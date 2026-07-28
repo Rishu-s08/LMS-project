@@ -25,13 +25,14 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | **Announcements** | Faculty/admin announcements to classes, enrollment-gated for students |
 | **Infrastructure** | Docker + Docker Compose setup, Prisma migrations, centralized error handling |
 | **Caching** | Redis read-through cache on all GET endpoints, pattern-based invalidation on writes |
+| **Logging** | Structured logging with Pino + pino-http, request/response auto-logging |
+| **Notifications** | Async notification server consuming RabbitMQ events (FCM/email ready) |
 | **Middleware** | JWT auth, RBAC (role-based access), Zod body + params validation, Multer file upload |
 
 ### 📋 Planned
 
 | Module | Description |
 |--------|-------------|
-| **Notifications** | In-app notifications for students on new assignments, grades, etc. |
 | **Frontend** | React/Next.js frontend (not yet started) |
 
 ---
@@ -43,6 +44,8 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 | Backend | Express 5 · TypeScript 6 · Node.js 20 |
 | Database | PostgreSQL 15 · Prisma 7.8 (PrismaPg adapter) |
 | Caching | Redis 7 · ioredis |
+| Messaging | RabbitMQ 4 · amqplib |
+| Logging | Pino · pino-http |
 | Auth | JWT (access + refresh tokens) · bcrypt · crypto |
 | File Storage | Supabase Storage · Multer |
 | Validation | Zod 4 |

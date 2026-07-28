@@ -1,4 +1,5 @@
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { CoursesRepository } from "./courses.repository.js";
 import type { CreateCourseInput } from "./courses.validation.js";
@@ -51,6 +52,7 @@ export class CoursesService {
     async createCourse(data: CreateCourseInput) {
         const newCourse = await this.coursesRepository.createCourse(data);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.COURSES, "*"));
+        logger.info({ courseId: newCourse.courseId, code: newCourse.code }, "Course created");
         return newCourse;
     }
 

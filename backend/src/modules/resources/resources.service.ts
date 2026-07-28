@@ -2,6 +2,7 @@ import { publishEvent } from "../../config/rabbitmq.js";
 import { routingKeys } from "../../shared/constants/constants.js";
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
 import { ClassesService } from "../classes/classes.service.js";
 import { resourcesRepository } from "./resources.repository.js";
@@ -76,7 +77,6 @@ export class ResourcesService {
         let attachmentUrl: string | null = null;
         if (file) {
             attachmentUrl = await uploadToCloud(file, SupabaseConstants.resourcesBucket);
-            console.log("Attachment uploaded to cloud storage:", attachmentUrl);
         }
         const createdResource = await this.resourcesRepository.createResource(data, attachmentUrl);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.RESOURCES, "*"));
@@ -86,6 +86,7 @@ export class ResourcesService {
             resourceId: createdResource.resourceId,
         })
 
+        logger.info({ resourceId: createdResource.resourceId, classId: createdResource.classId }, "Resource created");
         return createdResource;
     }
 

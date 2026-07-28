@@ -1,5 +1,6 @@
 import { SupabaseConstants } from "../../shared/constants/supabase.constants.js";
 import { ApiError } from "../../shared/errors/api_error.js";
+import { logger } from "../../shared/utils/logger.util.js";
 import { CacheKeyPrefix, cacheKeys, cacheManager } from "../../shared/utils/redis.utils.js";
 import { deleteFromCloud, uploadToCloud } from "../../shared/utils/supabase.util.js";
 import { AssignmentsService } from "../assignments/assignments.service.js";
@@ -97,6 +98,7 @@ export class SubmissionsService{
 
         const newSubmission = await this.submissionsRepository.createSubmission(data, attachmentUrl || null);
         await cacheManager.invalidateByPattern(cacheManager.createCacheKey(CacheKeyPrefix.SUBMISSIONS, "*"));
+        logger.info({ submissionId: newSubmission.submissionId, assignmentId: data.assignmentId, studentId: data.studentId }, "Submission created");
         return newSubmission;
 
     }
