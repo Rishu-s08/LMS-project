@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  userId  String   @id @default(uuid()) @map("user_id")
+  email    String   @unique
+  password String
+  name     String 
+  branch   String?
+  batch  String? // 2024
+  sem  Int?
+  avatarUrl   String? @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  role     Role     @default(STUDENT)
+  isActive Boolean  @default(true) @map("is_active")
+
+  @@map("users")
+  refreshTokens RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  classes Classes[]
+  enrollments Enrollment[]
+  submissions Submission[]
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  ADMIN
+} 
+
+
+model RefreshToken {
+  tokenId String @id @default(uuid()) @map("token_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userId String @map("user_id")
+
+
+  @@map("refresh_tokens")
+}
+
+
+model PasswordResetToken{
+  resetTokenId String @id @default(uuid()) @map("reset_token_id")
+  userId String @map("user_id")
+  token String @unique
+  expiresAt DateTime @map("expires_at")
+  usedAt DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+
+model Courses {
+  courseId String @id @default(uuid()) @map("course_id")
+  name String
+  code String @unique
+  credits Int?
+  description String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isArchived Boolean @default(false) @map("is_archived")
+
+  @@map("courses")
+  classes Classes[]
+}
+
+
+model Classes {
+  classId String @id @default(uuid()) @map("class_id")
+  semester Int
+  year Int
+  branch String
+  academicYear String @map("academic_year")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isArchived Boolean @default(false) @map("is_archived")
+
+  courseId String @map("course_id")
+  course Courses @relation(fields: [courseId], references: [courseId], onDelete: Cascade)
+
+  facultyId String @map("faculty_id")
+  faculty User @relation(fields: [facultyId], references: [userId], onDelete: Cascade)
+
+  @@map("classes")
+  enrollments Enrollment[]
+  assignments Assignment[]
+  resources Resource[]
+  announcements Announcement[]
+}
+
+
+model Enrollment {
+  enrollmentId String @id @default(uuid()) @map("enrollment_id")
+  classId String @map("class_id")
+  studentId String @map("student_id")
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@map("enrollments")
+}
+
+
+
+model Assignment {
+  assignmentId String @id @default(uuid()) @map("assignment_id")
+  title String
+  description String?
+  dueDate DateTime @map("due_date")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  classId String @map("class_id")
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+
+  attachmentUrl String? @map("attachment_url")
+
+  isPublished Boolean @default(true) @map("is_published")
+
+  @@map("assignments")
+  submissions Submission[]
+}
+
+
+
+model Resource {
+  resourceId String @id @default(uuid()) @map("resource_id")
+  title String
+  description String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  attachmentUrl String? @map("attachment_url")
+
+  classId String @map("class_id")
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+
+  @@map("resources")
+}
+
+
+
+model Submission {
+  submissionId String @id @default(uuid()) @map("submission_id")
+  assignmentId String @map("assignment_id")
+  studentId String @map("student_id")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+  attachmentUrl String? @map("attachment_url")
+  note String? @map("note")
+
+  assignment Assignment @relation(fields: [assignmentId], references: [assignmentId], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("submissions")
+} 
+
+
+model Announcement {
+  announcementId String @id @default(uuid()) @map("announcement_id")
+  title String
+  content String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  classId String @map("class_id")
+  class Classes @relation(fields: [classId], references: [classId], onDelete: Cascade)
+
+  @@map("announcements")
+}

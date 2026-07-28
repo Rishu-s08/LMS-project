@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    /* File Layout */
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* Environment Settings */
+    "module": "NodeNext",                         // FIXED: Required for verbatimModuleSyntax & modern Node.js
+    "moduleResolution": "NodeNext",               // ADDED: Pairs with NodeNext to resolve modules correctly
+    "target": "ES2022",                           // UPDATED: Modern JavaScript engine target for Node.js 18+
+    "types": ["node"],                            // FIXED: Gives you access to global types like process, Buffer, etc.
+
+    /* Other Outputs */
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    /* Stricter Typechecking Options */
+    "noUncheckedIndexedAccess": true,             // Keeps your object lookups secure
+    "exactOptionalPropertyTypes": true,           // Prevents mixing up undefined with missing properties
+
+    /* Recommended Options */
+    "strict": true,                               // Turns on all structural type-checking rules
+    "verbatimModuleSyntax": true,                 // Enforces strict import/export styles
+    "isolatedModules": true,                      // Guarantees compatibility with fast strip-type tooling
+    "noUncheckedSideEffectImports": true,         // Catches broken global/CSS style imports
+    "moduleDetection": "force",                   // Treats every file as a unique module
+    "skipLibCheck": true                          // Speeds up builds by ignoring type files inside node_modules
+  },
+  "include": ["src/**/*"]                         // ADDED: Instructs compiler to only look inside your source files
+}

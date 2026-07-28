@@ -119,13 +119,32 @@ Using `@prisma/adapter-pg` instead of Prisma's built-in connection handling.
 
 **Why:** Direct control over the PostgreSQL connection via the `pg` driver. Better for production scenarios (connection pooling, custom SSL, etc.).
 
-### 12. Docker-Compose Dev Environment
+### 12. Docker-Compose Multi-Service Architecture
 
-- PostgreSQL 15 (Alpine) with persistent volume.
-- Node app runs `prisma migrate deploy` on startup before `tsx watch`.
-- Host source code is volume-mounted for hot reload; `node_modules` is isolated.
+A single `docker-compose.yml` at the project root orchestrates all infrastructure and application services:
 
-**Why:** One `docker-compose up` gives a fully working environment. No local Postgres install needed. Volume mount for node_modules prevents OS-specific binary conflicts.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    docker-compose.yml (root)                     │
+├─────────────────────────────────────────────────────────────────┤
+│  Infrastructure:                                                 │
+│    • PostgreSQL 15 (Alpine) — shared DB, persistent volume       │
+│    • Redis 7 (Alpine) — caching, 256MB LRU eviction             │
+│    • RabbitMQ 4 — message broker for async notifications         │
+│                                                                  │
+│  Application Services:                                           │
+│    • Backend (Express) — runs migrations + serves API            │
+│    • Notification Server — consumes RabbitMQ, sends FCM/email    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+- All infra services have **healthchecks**. App services use `depends_on: condition: service_healthy` to wait for readiness.
+- Single `.env` at root — docker-compose interpolates `${VAR}` from it.
+- Each app service has its own Dockerfile, own `prisma/schema.prisma`, and is independently buildable.
+- Backend owns migrations (`prisma migrate deploy`). Notification server only generates types (`prisma generate`).
+- Source code is volume-mounted for hot reload in dev; `node_modules` is isolated via anonymous volume.
+
+**Why:** One `docker compose up` gives a fully working multi-service environment. Services are independently deployable. Healthchecks prevent startup race conditions. Shared `.env` eliminates config drift.
 
 ### 13. File Uploads — Multer + Supabase Storage
 

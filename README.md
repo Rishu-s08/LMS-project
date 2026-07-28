@@ -55,16 +55,22 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 
 ```
 LMS project/
+├── docker-compose.yml    # Single orchestrator for all services
+├── .env                  # Shared environment variables
+├── .env.example          # Template for new developers
 ├── backend/              # REST API (Express + Prisma)
 │   ├── src/
 │   │   ├── modules/      # Domain modules (auth, users, courses, ...)
 │   │   ├── middlewares/   # Auth, RBAC, validation, error handling
 │   │   ├── shared/        # Reusable utilities, errors, constants
-│   │   ├── config/        # Environment config
+│   │   ├── config/        # Environment config, Redis, Swagger
 │   │   └── db/            # Prisma client setup
-│   ├── prisma/            # Schema + migrations
+│   ├── prisma/            # Schema + migrations (source of truth)
 │   ├── ARCHITECTURE.md    # Design decisions & flow diagrams
 │   └── README.md          # Backend-specific docs
+├── notification_server/   # Async notification service (RabbitMQ consumer)
+│   ├── src/
+│   └── prisma/            # Schema copy (read-only, no migrations)
 └── frontend/             # (Not yet started)
 ```
 
@@ -75,18 +81,25 @@ LMS project/
 ```bash
 # Clone the repo
 git clone <repo-url>
-cd "LMS project/backend"
+cd "LMS project"
+
+# Copy env template and fill in your values
+cp .env.example .env
 
 # Run with Docker (recommended)
-docker-compose up --build
+docker compose up --build
 
-# App: http://localhost:8000
-# DB:  localhost:5432
+# Backend API:       http://localhost:8000
+# Notification Svc:  http://localhost:3001
+# RabbitMQ UI:       http://localhost:15672 (guest:guest)
+# PostgreSQL:        localhost:5432
+# Redis:             localhost:6379
 ```
 
-Or run locally (requires Node.js 20+ and PostgreSQL):
+Or run locally (requires Node.js 20+, PostgreSQL, Redis):
 
 ```bash
+cd backend
 npm install
 npx prisma generate
 npx prisma migrate deploy

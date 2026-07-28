@@ -31,7 +31,7 @@ npx prisma migrate deploy
 npm run dev
 ```
 
-Set environment variables in `.env` (see below).
+Environment variables are loaded from the root `.env` file (one level up). Set `DATABASE_URL`, `REDIS_URL`, and auth secrets there.
 
 ---
 
