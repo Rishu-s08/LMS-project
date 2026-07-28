@@ -72,7 +72,7 @@ Base URL: `/api/v1`
 
 | Method | Endpoint | Auth | Roles | Description |
 |--------|----------|------|-------|-------------|
-| POST | `/create` | No | — | Register a new user |
+| POST | `/create` | Yes | — | Register a new user |
 | GET | `/me` | Yes | ALL | Get current user profile |
 | GET | `/id/:userId` | Yes | FACULTY, ADMIN | Get user by ID |
 | GET | `/email/:email` | Yes | FACULTY, ADMIN | Get user by email |
