@@ -96,7 +96,7 @@ router.get("/", authMiddleware, authorizeRoles(roles.ADMIN), userController.getA
  *       409:
  *         description: User with this email already exists
  */
-router.post("/create", validateRequest(RegisterUserSchema), userController.registerUser);
+router.post("/create",authMiddleware, authorizeRoles(roles.ADMIN), validateRequest(RegisterUserSchema), userController.registerUser);
 
 /**
  * @openapi
