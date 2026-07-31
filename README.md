@@ -33,7 +33,7 @@ A web-based LMS where faculty can create courses, manage classes, post assignmen
 
 | Module | Description |
 |--------|-------------|
-| **Frontend** | React/Next.js frontend (not yet started) |
+| **Frontend** | Flutter frontend (not yet started) |
 
 ---
 
