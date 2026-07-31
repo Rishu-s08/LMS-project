@@ -112,11 +112,11 @@ npm run dev
 
 ---
 
-## System Design
+## Database Schema
 
 ![System Design](./docs/image.png)
 
-## Database Schema
+## System Design
 
 ![ERD](./docs/image1.png)
 
