@@ -43,6 +43,8 @@ router.get("/", authMiddleware, authorizeRoles(roles.ADMIN), userController.getA
  *   post:
  *     tags: [Users]
  *     summary: Register a new user
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
